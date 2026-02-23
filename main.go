@@ -36,7 +36,14 @@ func main() {
 	fmt.Printf("HTML file created at: %s\n", htmlPath)
 }
 
-func isH1(str string) bool {
-	r, _ := regexp.Compile(`#\s.*`)
-	return r.MatchString(str)
+type regex struct {
+	h1 regexp.Regexp
+}
+
+func newRegex() *regex {
+	h1, _ := regexp.Compile(`#\s.*`)
+	r := regex{
+		h1: *h1,
+	}
+	return &r
 }
