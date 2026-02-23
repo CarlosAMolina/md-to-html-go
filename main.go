@@ -36,14 +36,14 @@ func main() {
 	fmt.Printf("HTML file created at: %s\n", htmlPath)
 }
 
-type regex struct {
-	h1 regexp.Regexp
+type Regex struct {
+	H1 regexp.Regexp
 }
 
-func newRegex() *regex {
+func newRegex() *Regex {
 	h1, _ := regexp.Compile(`#\s.*`)
-	r := regex{
-		h1: *h1,
+	r := Regex{
+		H1: *h1,
 	}
 	return &r
 }
