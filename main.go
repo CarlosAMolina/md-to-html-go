@@ -38,12 +38,15 @@ func main() {
 
 type Regex struct {
 	H1 regexp.Regexp
+	H2 regexp.Regexp
 }
 
 func newRegex() *Regex {
 	h1, _ := regexp.Compile(`#\s.*`)
+	h2, _ := regexp.Compile(`##\s.*`)
 	r := Regex{
 		H1: *h1,
+		H2: *h2,
 	}
 	return &r
 }
