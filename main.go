@@ -41,6 +41,8 @@ type Regex struct {
 	H2 regexp.Regexp
 	H3 regexp.Regexp
 	H4 regexp.Regexp
+	H5 regexp.Regexp
+	H6 regexp.Regexp
 }
 
 func newRegex() *Regex {
@@ -48,11 +50,15 @@ func newRegex() *Regex {
 	h2, _ := regexp.Compile(`##\s.*`)
 	h3, _ := regexp.Compile(`###\s.*`)
 	h4, _ := regexp.Compile(`####\s.*`)
+	h5, _ := regexp.Compile(`#####\s.*`)
+	h6, _ := regexp.Compile(`######\s.*`)
 	r := Regex{
 		H1: *h1,
 		H2: *h2,
 		H3: *h3,
 		H4: *h4,
+		H5: *h5,
+		H6: *h6,
 	}
 	return &r
 }
