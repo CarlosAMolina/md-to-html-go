@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"strings"
 )
 
 func main() {
@@ -48,12 +49,12 @@ func convertFile() string {
 	r := newRegex()
 	for scanner.Scan() {
 		line := scanner.Text()
-		result = r.Convert(line)
+		result = result + "\n" + r.Convert(line)
 	}
 	if err := scanner.Err(); err != nil {
 		panic(fmt.Errorf("Error reading file: %v", err))
 	}
-	return result
+	return strings.TrimSpace(result)
 }
 
 type Regex struct {
@@ -66,12 +67,12 @@ type Regex struct {
 }
 
 func newRegex() *Regex {
-	h1, _ := regexp.Compile(`#\s.*`)
-	h2, _ := regexp.Compile(`##\s.*`)
-	h3, _ := regexp.Compile(`###\s.*`)
-	h4, _ := regexp.Compile(`####\s.*`)
-	h5, _ := regexp.Compile(`#####\s.*`)
-	h6, _ := regexp.Compile(`######\s.*`)
+	h1, _ := regexp.Compile(`^#\s.*`)
+	h2, _ := regexp.Compile(`^##\s.*`)
+	h3, _ := regexp.Compile(`^###\s.*`)
+	h4, _ := regexp.Compile(`^####\s.*`)
+	h5, _ := regexp.Compile(`^#####\s.*`)
+	h6, _ := regexp.Compile(`^######\s.*`)
 	r := Regex{
 		H1: *h1,
 		H2: *h2,
@@ -83,9 +84,16 @@ func newRegex() *Regex {
 	return &r
 }
 
-func (r *Regex) Convert(input string) string {
-	if r.H1.MatchString(input) {
-		return fmt.Sprintf("<h1>%s</h1>", input[2:])
+func (r *Regex) Convert(line string) string {
+	fmt.Println("Procesing line: ", line) // TODO rm
+	if r.H1.MatchString(line) {
+		fmt.Println("match 1") // TODO rm
+		return fmt.Sprintf("<h1>%s</h1>", line[2:])
 	}
-	return input
+	if r.H2.MatchString(line) {
+		fmt.Println("match 2") // TODO rm
+		return fmt.Sprintf("<h2>%s</h2>", line[3:])
+	}
+	fmt.Println("no match") // TODO rm
+	return line
 }

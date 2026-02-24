@@ -58,7 +58,8 @@ func TestConvertFile(t *testing.T) {
 	if err != nil {
 		panic(fmt.Errorf("Error opening file: %v", err))
 	}
-	if strings.TrimSpace(string(expected)) != result {
-		t.Errorf("Not converted")
+	expected_str := strings.TrimSpace(string(expected))
+	if expected_str != result {
+		t.Errorf("Not converted. Want:\n%v\nGot:\n%v", expected_str, result)
 	}
 }
