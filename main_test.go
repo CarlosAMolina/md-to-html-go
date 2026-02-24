@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 )
 
@@ -47,5 +49,16 @@ func TestIsH1(t *testing.T) {
 	result = r.H6.MatchString(str)
 	if !result {
 		t.Errorf("not matched %v", str)
+	}
+}
+
+func TestConvertFile(t *testing.T) {
+	result := convertFile()
+	expected, err := os.ReadFile("testdata/output.html")
+	if err != nil {
+		panic(fmt.Errorf("Error opening file: %v", err))
+	}
+	if strings.TrimSpace(string(expected)) != result {
+		t.Errorf("Not converted")
 	}
 }

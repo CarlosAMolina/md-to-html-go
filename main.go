@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/base64"
 	"fmt"
 	"log"
@@ -36,6 +37,25 @@ func main() {
 	fmt.Printf("HTML file created at: %s\n", htmlPath)
 }
 
+func convertFile() string {
+	file, err := os.Open("testdata/input.md")
+	if err != nil {
+		panic(fmt.Errorf("Error opening file: %v", err))
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	result := ""
+	r := newRegex()
+	for scanner.Scan() {
+		line := scanner.Text()
+		result = r.Convert(line)
+	}
+	if err := scanner.Err(); err != nil {
+		panic(fmt.Errorf("Error reading file: %v", err))
+	}
+	return result
+}
+
 type Regex struct {
 	H1 regexp.Regexp
 	H2 regexp.Regexp
@@ -61,4 +81,11 @@ func newRegex() *Regex {
 		H6: *h6,
 	}
 	return &r
+}
+
+func (r *Regex) Convert(input string) string {
+	if r.H1.MatchString(input) {
+		return fmt.Sprintf("<h1>%s</h1>", input[2:])
+	}
+	return input
 }
