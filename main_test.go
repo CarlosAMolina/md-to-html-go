@@ -53,7 +53,7 @@ func TestIsH1(t *testing.T) {
 }
 
 func TestConvertFile(t *testing.T) {
-	result := convertFile()
+	result := convertFile("testdata/input.md")
 	expected, err := os.ReadFile("testdata/output.html")
 	if err != nil {
 		panic(fmt.Errorf("Error opening file: %v", err))

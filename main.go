@@ -38,8 +38,8 @@ func main() {
 	fmt.Printf("HTML file created at: %s\n", htmlPath)
 }
 
-func convertFile() string {
-	file, err := os.Open("testdata/input.md")
+func convertFile(path string) string {
+	file, err := os.Open(path)
 	if err != nil {
 		panic(fmt.Errorf("Error opening file: %v", err))
 	}
