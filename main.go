@@ -40,16 +40,19 @@ type Regex struct {
 	H1 regexp.Regexp
 	H2 regexp.Regexp
 	H3 regexp.Regexp
+	H4 regexp.Regexp
 }
 
 func newRegex() *Regex {
 	h1, _ := regexp.Compile(`#\s.*`)
 	h2, _ := regexp.Compile(`##\s.*`)
 	h3, _ := regexp.Compile(`###\s.*`)
+	h4, _ := regexp.Compile(`####\s.*`)
 	r := Regex{
 		H1: *h1,
 		H2: *h2,
 		H3: *h3,
+		H4: *h4,
 	}
 	return &r
 }
