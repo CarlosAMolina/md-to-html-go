@@ -91,5 +91,17 @@ func (r *Regex) Convert(line string) string {
 	if r.H2.MatchString(line) {
 		return r.H2.ReplaceAllString(line, "<h2>$1</h2>")
 	}
+	if r.H3.MatchString(line) {
+		return r.H3.ReplaceAllString(line, "<h3>$1</h3>")
+	}
+	if r.H4.MatchString(line) {
+		return r.H4.ReplaceAllString(line, "<h4>$1</h4>")
+	}
+	if r.H5.MatchString(line) {
+		return r.H5.ReplaceAllString(line, "<h5>$1</h5>")
+	}
+	if r.H6.MatchString(line) {
+		return r.H6.ReplaceAllString(line, "<h6>$1</h6>")
+	}
 	return line
 }
