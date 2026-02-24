@@ -67,12 +67,12 @@ type Regex struct {
 }
 
 func newRegex() *Regex {
-	h1 := regexp.MustCompile(`^#\s.*`)
-	h2 := regexp.MustCompile(`^##\s.*`)
-	h3 := regexp.MustCompile(`^###\s.*`)
-	h4 := regexp.MustCompile(`^####\s.*`)
-	h5 := regexp.MustCompile(`^#####\s.*`)
-	h6 := regexp.MustCompile(`^######\s.*`)
+	h1 := regexp.MustCompile(`^#\s+(.*)`)
+	h2 := regexp.MustCompile(`^##\s+(.*)`)
+	h3 := regexp.MustCompile(`^###\s+(.*)`)
+	h4 := regexp.MustCompile(`^####\s+(.*)`)
+	h5 := regexp.MustCompile(`^#####\s+(.*)`)
+	h6 := regexp.MustCompile(`^######\s+(.*)`)
 	r := Regex{
 		H1: *h1,
 		H2: *h2,
@@ -85,15 +85,11 @@ func newRegex() *Regex {
 }
 
 func (r *Regex) Convert(line string) string {
-	fmt.Println("Procesing line: ", line) // TODO rm
 	if r.H1.MatchString(line) {
-		fmt.Println("match 1") // TODO rm
-		return fmt.Sprintf("<h1>%s</h1>", line[2:])
+		return r.H1.ReplaceAllString(line, "<h1>$1</h1>")
 	}
 	if r.H2.MatchString(line) {
-		fmt.Println("match 2") // TODO rm
-		return fmt.Sprintf("<h2>%s</h2>", line[3:])
+		return r.H2.ReplaceAllString(line, "<h2>$1</h2>")
 	}
-	fmt.Println("no match") // TODO rm
 	return line
 }
