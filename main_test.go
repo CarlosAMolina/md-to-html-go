@@ -28,4 +28,9 @@ func TestIsH1(t *testing.T) {
 	if !result {
 		t.Errorf("not matched %v", str)
 	}
+	str = "### Tittle"
+	result = r.H3.MatchString(str)
+	if !result {
+		t.Errorf("not matched %v", str)
+	}
 }
