@@ -67,12 +67,12 @@ type Regex struct {
 }
 
 func newRegex() *Regex {
-	h1, _ := regexp.Compile(`^#\s.*`)
-	h2, _ := regexp.Compile(`^##\s.*`)
-	h3, _ := regexp.Compile(`^###\s.*`)
-	h4, _ := regexp.Compile(`^####\s.*`)
-	h5, _ := regexp.Compile(`^#####\s.*`)
-	h6, _ := regexp.Compile(`^######\s.*`)
+	h1 := regexp.MustCompile(`^#\s.*`)
+	h2 := regexp.MustCompile(`^##\s.*`)
+	h3 := regexp.MustCompile(`^###\s.*`)
+	h4 := regexp.MustCompile(`^####\s.*`)
+	h5 := regexp.MustCompile(`^#####\s.*`)
+	h6 := regexp.MustCompile(`^######\s.*`)
 	r := Regex{
 		H1: *h1,
 		H2: *h2,
