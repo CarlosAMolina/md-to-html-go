@@ -58,15 +58,17 @@ func convertFile(path string) string {
 }
 
 type Regex struct {
-	H1 regexp.Regexp
-	H2 regexp.Regexp
-	H3 regexp.Regexp
-	H4 regexp.Regexp
-	H5 regexp.Regexp
-	H6 regexp.Regexp
+	CodeInline regexp.Regexp
+	H1         regexp.Regexp
+	H2         regexp.Regexp
+	H3         regexp.Regexp
+	H4         regexp.Regexp
+	H5         regexp.Regexp
+	H6         regexp.Regexp
 }
 
 func newRegex() *Regex {
+	codeInline := regexp.MustCompile("`([^`]+)`")
 	h1 := regexp.MustCompile(`^#\s+(.*)`)
 	h2 := regexp.MustCompile(`^##\s+(.*)`)
 	h3 := regexp.MustCompile(`^###\s+(.*)`)
@@ -74,12 +76,13 @@ func newRegex() *Regex {
 	h5 := regexp.MustCompile(`^#####\s+(.*)`)
 	h6 := regexp.MustCompile(`^######\s+(.*)`)
 	r := Regex{
-		H1: *h1,
-		H2: *h2,
-		H3: *h3,
-		H4: *h4,
-		H5: *h5,
-		H6: *h6,
+		CodeInline: *codeInline,
+		H1:         *h1,
+		H2:         *h2,
+		H3:         *h3,
+		H6:         *h6,
+		H4:         *h4,
+		H5:         *h5,
 	}
 	return &r
 }
@@ -106,5 +109,6 @@ func (r *Regex) Convert(line string) string {
 	if strings.TrimSpace(line) == "" {
 		return line
 	}
+	line = r.CodeInline.ReplaceAllString(line, "<code>$1</code>")
 	return "<p>" + line + "</p>"
 }

@@ -11,3 +11,5 @@
 ###### Title 6
 
 Foo bar.
+
+This is `a piece of code` and this is `another one`.
