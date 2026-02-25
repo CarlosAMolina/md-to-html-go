@@ -10,4 +10,4 @@
 
 ###### Title 6
 
-Foo bar
+Foo bar.
