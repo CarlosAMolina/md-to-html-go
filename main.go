@@ -103,5 +103,8 @@ func (r *Regex) Convert(line string) string {
 	if r.H6.MatchString(line) {
 		return r.H6.ReplaceAllString(line, "<h6>$1</h6>")
 	}
-	return line
+	if strings.TrimSpace(line) == "" {
+		return line
+	}
+	return "<p>" + line + "</p>"
 }
