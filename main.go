@@ -51,9 +51,9 @@ func convertFile(path string) string {
 	html := ""
 	for scanner.Scan() {
 		line := scanner.Text()
-		if r.CodeLines.MatchString(line) {
+		if r.CodeBlock.MatchString(line) {
 			skipLine = !skipLine
-			html = r.ConvertCodeLines(skipLine)
+			html = r.ConvertCode(skipLine)
 		} else {
 			if skipLine {
 				html = line
@@ -70,8 +70,8 @@ func convertFile(path string) string {
 }
 
 type Regex struct {
+	CodeBlock  regexp.Regexp
 	CodeInline regexp.Regexp
-	CodeLines  regexp.Regexp
 	H1         regexp.Regexp
 	H2         regexp.Regexp
 	H3         regexp.Regexp
@@ -81,8 +81,8 @@ type Regex struct {
 }
 
 func newRegex() *Regex {
+	codeBlock := regexp.MustCompile("```.*")
 	codeInline := regexp.MustCompile("`([^`]+)`")
-	codeLines := regexp.MustCompile("```.*")
 	h1 := regexp.MustCompile(`^#\s+(.*)`)
 	h2 := regexp.MustCompile(`^##\s+(.*)`)
 	h3 := regexp.MustCompile(`^###\s+(.*)`)
@@ -90,8 +90,8 @@ func newRegex() *Regex {
 	h5 := regexp.MustCompile(`^#####\s+(.*)`)
 	h6 := regexp.MustCompile(`^######\s+(.*)`)
 	r := Regex{
+		CodeBlock:  *codeBlock,
 		CodeInline: *codeInline,
-		CodeLines:  *codeLines,
 		H1:         *h1,
 		H2:         *h2,
 		H3:         *h3,
@@ -128,7 +128,7 @@ func (r *Regex) Convert(line string) string {
 	return "<p>" + line + "</p>"
 }
 
-func (r *Regex) ConvertCodeLines(isStart bool) string {
+func (r *Regex) ConvertCode(isStart bool) string {
 	if isStart {
 		return "<div class=\"sourceCode\">"
 	}
