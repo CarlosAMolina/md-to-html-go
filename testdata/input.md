@@ -12,4 +12,10 @@
 
 Foo bar.
 
+```
+print('foo')
+
+print('bar')
+```
+
 This is `a piece of code` and this is `another one`.

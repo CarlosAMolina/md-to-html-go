@@ -47,9 +47,21 @@ func convertFile(path string) string {
 	scanner := bufio.NewScanner(file)
 	result := ""
 	r := newRegex()
+	skipLine := false
+	html := ""
 	for scanner.Scan() {
 		line := scanner.Text()
-		result = result + "\n" + r.Convert(line)
+		if r.CodeLines.MatchString(line) {
+			skipLine = !skipLine
+			html = r.ConvertCodeLines(skipLine)
+		} else {
+			if skipLine {
+				html = line
+			} else {
+				html = r.Convert(line)
+			}
+		}
+		result = result + "\n" + html
 	}
 	if err := scanner.Err(); err != nil {
 		panic(fmt.Errorf("Error reading file: %v", err))
@@ -59,6 +71,7 @@ func convertFile(path string) string {
 
 type Regex struct {
 	CodeInline regexp.Regexp
+	CodeLines  regexp.Regexp
 	H1         regexp.Regexp
 	H2         regexp.Regexp
 	H3         regexp.Regexp
@@ -69,6 +82,7 @@ type Regex struct {
 
 func newRegex() *Regex {
 	codeInline := regexp.MustCompile("`([^`]+)`")
+	codeLines := regexp.MustCompile("```.*")
 	h1 := regexp.MustCompile(`^#\s+(.*)`)
 	h2 := regexp.MustCompile(`^##\s+(.*)`)
 	h3 := regexp.MustCompile(`^###\s+(.*)`)
@@ -77,6 +91,7 @@ func newRegex() *Regex {
 	h6 := regexp.MustCompile(`^######\s+(.*)`)
 	r := Regex{
 		CodeInline: *codeInline,
+		CodeLines:  *codeLines,
 		H1:         *h1,
 		H2:         *h2,
 		H3:         *h3,
@@ -111,4 +126,11 @@ func (r *Regex) Convert(line string) string {
 	}
 	line = r.CodeInline.ReplaceAllString(line, "<code>$1</code>")
 	return "<p>" + line + "</p>"
+}
+
+func (r *Regex) ConvertCodeLines(isStart bool) string {
+	if isStart {
+		return "<div class=\"sourceCode\">"
+	}
+	return "</div>"
 }
