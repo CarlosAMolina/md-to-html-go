@@ -47,15 +47,15 @@ func convertFile(path string) string {
 	scanner := bufio.NewScanner(file)
 	result := ""
 	r := newRegex()
-	skipLine := false
+	skip := false
 	html := ""
 	for scanner.Scan() {
 		line := scanner.Text()
 		if r.CodeBlock.MatchString(line) {
-			skipLine = !skipLine
-			html = r.ConvertCode(skipLine)
+			skip = !skip
+			html = r.ConvertCode(skip)
 		} else {
-			if skipLine {
+			if skip {
 				html = line
 			} else {
 				html = r.Convert(line)
