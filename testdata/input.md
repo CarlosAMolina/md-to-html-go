@@ -15,6 +15,7 @@ Foo bar.
 ```
 print('foo')
 
+# Comment here.
 print('bar')
 ```
 
