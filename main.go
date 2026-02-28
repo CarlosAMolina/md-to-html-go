@@ -174,18 +174,15 @@ func convertTableBlock(lines []string) string {
 		sb.WriteString("\n<th>" + cell + "</th>")
 	}
 	sb.WriteString("\n</tr>\n</thead>")
-	// TODO rm if
-	if len(lines) > 2 {
-		sb.WriteString("\n<tbody>")
-		for _, line := range lines[2:] {
-			sb.WriteString("\n<tr>")
-			for _, cell := range splitTableRow(line) {
-				sb.WriteString("\n<th>" + cell + "</th>")
-			}
-			sb.WriteString("\n</tr>")
+	sb.WriteString("\n<tbody>")
+	for _, line := range lines[2:] {
+		sb.WriteString("\n<tr>")
+		for _, cell := range splitTableRow(line) {
+			sb.WriteString("\n<th>" + cell + "</th>")
 		}
-		sb.WriteString("\n</tbody>")
+		sb.WriteString("\n</tr>")
 	}
+	sb.WriteString("\n</tbody>")
 	sb.WriteString("\n</table>")
 	return sb.String()
 }
