@@ -23,68 +23,145 @@ func main() {
 	fmt.Println(result)
 }
 
-func convertFile(path string) (string, error) {
+type blockKind int
+
+const (
+	textBlock blockKind = iota
+	listBlock
+	codeBlock
+	blankBlock
+)
+
+type block struct {
+	kind  blockKind
+	lines []string
+}
+
+func readLines(path string) ([]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
-		return "", fmt.Errorf("error opening file: %w", err)
+		return nil, fmt.Errorf("error opening file: %w", err)
 	}
 	defer file.Close()
 
-	var sb strings.Builder
+	var lines []string
 	scanner := bufio.NewScanner(file)
-	skip := false
-	var ulIndentStack []int
-	prevIndent := -1
 	for scanner.Scan() {
-		line := scanner.Text()
-		var html string
-		if r.CodeBlock.MatchString(line) {
-			skip = !skip
-			html = r.ConvertCode(skip)
-		} else if skip {
-			html = line
-		} else if m := r.ListItem.FindStringSubmatch(line); m != nil {
-			indent := len(m[1])
-			if prevIndent == -1 || indent > prevIndent {
-				// TODO check why is necessary
-				if sb.Len() > 0 {
-					sb.WriteByte('\n')
-				}
-				sb.WriteString("<ul>")
-				ulIndentStack = append(ulIndentStack, indent)
-			} else if indent < prevIndent {
-				for len(ulIndentStack) > 0 && indent < ulIndentStack[len(ulIndentStack)-1] {
-					// TODO repeated in other parts
-					sb.WriteByte('\n')
-					sb.WriteString("</ul>")
-					ulIndentStack = ulIndentStack[:len(ulIndentStack)-1]
-				}
-			}
-			html = "<li>" + r.ConvertInline(strings.TrimSpace(m[2])) + "</li>"
-			prevIndent = indent
-		} else {
-			for len(ulIndentStack) > 0 {
-				sb.WriteByte('\n')
-				sb.WriteString("</ul>")
-				ulIndentStack = ulIndentStack[:len(ulIndentStack)-1]
-			}
-			prevIndent = -1
-			html = r.Convert(line)
-		}
-		if sb.Len() > 0 {
-			sb.WriteByte('\n')
-		}
-		sb.WriteString(html)
-	}
-	for len(ulIndentStack) > 0 {
-		sb.WriteByte('\n')
-		sb.WriteString("</ul>")
-		ulIndentStack = ulIndentStack[:len(ulIndentStack)-1]
+		lines = append(lines, scanner.Text())
 	}
 	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("error reading file: %w", err)
+		return nil, fmt.Errorf("error reading file: %w", err)
 	}
-	return strings.TrimSpace(sb.String()), nil
+	return lines, nil
+}
+
+func groupBlocks(lines []string) []block {
+	var blocks []block
+	i := 0
+	for i < len(lines) {
+		line := lines[i]
+		switch {
+		case strings.TrimSpace(line) == "":
+			blocks = append(blocks, block{kind: blankBlock})
+			i++
+		case r.CodeBlock.MatchString(line):
+			var codeLines []string
+			codeLines = append(codeLines, line) // opening ```
+			i++
+			for i < len(lines) && !r.CodeBlock.MatchString(lines[i]) {
+				codeLines = append(codeLines, lines[i])
+				i++
+			}
+			// TODO i think this if is not required, always with be true after the for loop
+			if i < len(lines) {
+				codeLines = append(codeLines, lines[i]) // closing ```
+				i++
+			}
+			blocks = append(blocks, block{kind: codeBlock, lines: codeLines})
+		case r.ListItem.MatchString(line):
+			var listLines []string
+			for i < len(lines) && r.ListItem.MatchString(lines[i]) {
+				listLines = append(listLines, lines[i])
+				i++
+			}
+			blocks = append(blocks, block{kind: listBlock, lines: listLines})
+		default:
+			blocks = append(blocks, block{kind: textBlock, lines: []string{line}})
+			i++
+		}
+	}
+	return blocks
+}
+
+func convertFile(path string) (string, error) {
+	lines, err := readLines(path)
+	if err != nil {
+		return "", err
+	}
+
+	blocks := groupBlocks(lines)
+	parts := make([]string, 0, len(blocks))
+	for _, b := range blocks {
+		switch b.kind {
+		case blankBlock:
+			parts = append(parts, "")
+		case codeBlock:
+			parts = append(parts, convertCodeBlock(b.lines))
+		case listBlock:
+			parts = append(parts, convertListBlock(b.lines))
+		case textBlock:
+			parts = append(parts, r.Convert(b.lines[0]))
+		}
+	}
+	return strings.TrimSpace(strings.Join(parts, "\n")), nil
+}
+
+func convertCodeBlock(lines []string) string {
+	var sb strings.Builder
+	sb.WriteString(`<div class="sourceCode">`)
+	for _, line := range lines[1 : len(lines)-1] { // skip opening and closing ```
+		sb.WriteByte('\n')
+		sb.WriteString(line)
+	}
+	sb.WriteByte('\n')
+	sb.WriteString("</div>")
+	return sb.String()
+}
+
+func convertListBlock(lines []string) string {
+	var sb strings.Builder
+	var indentStack []int
+	for _, line := range lines {
+		m := r.ListItem.FindStringSubmatch(line)
+		// TODO i think this situation should never happen
+		if m == nil {
+			continue
+		}
+		indent := len(m[1])
+		text := r.ConvertInline(strings.TrimSpace(m[2]))
+		if len(indentStack) == 0 || indent > indentStack[len(indentStack)-1] {
+			// TODO why is this required?
+			if sb.Len() > 0 {
+				sb.WriteByte('\n')
+			}
+			sb.WriteString("<ul>")
+			indentStack = append(indentStack, indent)
+		} else if indent < indentStack[len(indentStack)-1] {
+			for len(indentStack) > 0 && indent < indentStack[len(indentStack)-1] {
+				sb.WriteByte('\n')
+				sb.WriteString("</ul>")
+				indentStack = indentStack[:len(indentStack)-1]
+			}
+		}
+		sb.WriteByte('\n')
+		sb.WriteString("<li>" + text + "</li>")
+	}
+	for len(indentStack) > 0 {
+		sb.WriteByte('\n')
+		sb.WriteString("</ul>")
+		indentStack = indentStack[:len(indentStack)-1]
+	}
+	return sb.String()
 }
 
 type Regex struct {
@@ -143,19 +220,11 @@ func (r *Regex) Convert(line string) string {
 	if r.LinkOnly.MatchString(line) {
 		return "<p>" + r.LinkOnly.ReplaceAllString(line, `<a href="$2">$1</a>`) + "</p>"
 	}
-	line = r.ConvertInline(line)
-	return "<p>" + line + "</p>"
+	return "<p>" + r.ConvertInline(line) + "</p>"
 }
 
 func (r *Regex) ConvertInline(text string) string {
 	text = r.LinkInline.ReplaceAllString(text, `<a href="$2">$1</a>`)
 	text = r.CodeInline.ReplaceAllString(text, "<code>$1</code>")
 	return text
-}
-
-func (r *Regex) ConvertCode(isStart bool) string {
-	if isStart {
-		return "<div class=\"sourceCode\">"
-	}
-	return "</div>"
 }
