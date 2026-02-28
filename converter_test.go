@@ -6,8 +6,8 @@ import (
 	"testing"
 )
 
-func TestConvertFile(t *testing.T) {
-	result, err := ConvertFile("testdata/md/file.md")
+func TestConvertLines(t *testing.T) {
+	result, err := ConvertLines("testdata/md/file.md")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

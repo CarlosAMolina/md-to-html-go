@@ -25,7 +25,7 @@ type block struct {
 
 var r = newRegex()
 
-func ConvertFile(path string) (string, error) {
+func ConvertLines(path string) (string, error) {
 	lines, err := readLines(path)
 	if err != nil {
 		return "", err

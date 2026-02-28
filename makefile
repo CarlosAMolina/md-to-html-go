@@ -2,7 +2,7 @@ build:
 	go build -o md-to-html .
 
 filter:
-	go test -run TestConvertFile
+	go test -run TestConvertLines
 
 format:
 	go fmt .

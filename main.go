@@ -17,7 +17,7 @@ func main() {
 		os.Exit(1)
 	}
 	for _, f := range files {
-		html, err := ConvertFile(f.input)
+		html, err := ConvertLines(f.input)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error converting %s: %v\n", f.input, err)
 			os.Exit(1)
