@@ -4,4 +4,3 @@
 - Convert TOC.
 - Convert table.
 - Convert unordered lists with different indentation levels.
-- Convert hyperlinks. Check if one line with only one hyperlink should have <p></p> to apply the css style.

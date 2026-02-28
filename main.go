@@ -84,6 +84,10 @@ func newRegex() *Regex {
 }
 
 func (r *Regex) Convert(line string) string {
+	line = strings.TrimSpace(line)
+	if line == "" {
+		return line
+	}
 	if r.H6.MatchString(line) {
 		return r.H6.ReplaceAllString(line, "<h6>$1</h6>")
 	}
@@ -101,9 +105,6 @@ func (r *Regex) Convert(line string) string {
 	}
 	if r.H1.MatchString(line) {
 		return r.H1.ReplaceAllString(line, "<h1>$1</h1>")
-	}
-	if strings.TrimSpace(line) == "" {
-		return line
 	}
 	if r.LinkOnly.MatchString(line) {
 		return "<p>" + r.LinkOnly.ReplaceAllString(line, `<a href="$2">$1</a>`) + "</p>"
