@@ -237,28 +237,33 @@ func (r *Regex) Convert(line string) string {
 	if line == "" {
 		return line
 	}
-	if r.H6.MatchString(line) {
-		return r.H6.ReplaceAllString(line, "<h6>$1</h6>")
+	if m := r.H6.FindStringSubmatch(line); m != nil {
+		return heading("h6", m[1])
 	}
-	if r.H5.MatchString(line) {
-		return r.H5.ReplaceAllString(line, "<h5>$1</h5>")
+	if m := r.H5.FindStringSubmatch(line); m != nil {
+		return heading("h5", m[1])
 	}
-	if r.H4.MatchString(line) {
-		return r.H4.ReplaceAllString(line, "<h4>$1</h4>")
+	if m := r.H4.FindStringSubmatch(line); m != nil {
+		return heading("h4", m[1])
 	}
-	if r.H3.MatchString(line) {
-		return r.H3.ReplaceAllString(line, "<h3>$1</h3>")
+	if m := r.H3.FindStringSubmatch(line); m != nil {
+		return heading("h3", m[1])
 	}
-	if r.H2.MatchString(line) {
-		return r.H2.ReplaceAllString(line, "<h2>$1</h2>")
+	if m := r.H2.FindStringSubmatch(line); m != nil {
+		return heading("h2", m[1])
 	}
-	if r.H1.MatchString(line) {
-		return r.H1.ReplaceAllString(line, "<h1>$1</h1>")
+	if m := r.H1.FindStringSubmatch(line); m != nil {
+		return heading("h1", m[1])
 	}
 	if r.LinkOnly.MatchString(line) {
 		return "<p>" + r.LinkOnly.ReplaceAllString(line, `<a href="$2">$1</a>`) + "</p>"
 	}
 	return "<p>" + r.ConvertInline(line) + "</p>"
+}
+
+func heading(tag, text string) string {
+	id := strings.ReplaceAll(strings.ToLower(text), " ", "-")
+	return "<" + tag + ` id="` + id + `">` + text + "</" + tag + ">"
 }
 
 func (r *Regex) ConvertInline(text string) string {

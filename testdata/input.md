@@ -1,5 +1,11 @@
 # Title 1
 
+## Table of contents
+
+- [Title 2](#title-2)
+  - [Title 3](#title-3)
+- [Text](#text)
+
 ## Title 2
 
 ### Title 3
@@ -9,6 +15,8 @@
 ##### Title 5
 
 ###### Title 6
+
+## Text
 
 Foo bar.
 
