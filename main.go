@@ -92,7 +92,6 @@ func groupBlocks(lines []string) []block {
 				codeLines = append(codeLines, lines[i])
 				i++
 			}
-			// TODO i think this if is not required, always with be true after the for loop
 			if i < len(lines) {
 				codeLines = append(codeLines, lines[i]) // closing ```
 				i++
@@ -130,14 +129,9 @@ func convertListBlock(lines []string) string {
 	var indentStack []int
 	for _, line := range lines {
 		m := r.ListItem.FindStringSubmatch(line)
-		// TODO i think this situation should never happen
-		if m == nil {
-			continue
-		}
 		indent := len(m[1])
 		text := r.ConvertInline(strings.TrimSpace(m[2]))
 		if len(indentStack) == 0 || indent > indentStack[len(indentStack)-1] {
-			// TODO why is this required?
 			if sb.Len() > 0 {
 				sb.WriteByte('\n')
 			}
