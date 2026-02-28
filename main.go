@@ -80,14 +80,13 @@ func groupBlocks(lines []string) []block {
 	var blocks []block
 	i := 0
 	for i < len(lines) {
-		line := lines[i]
 		switch {
-		case strings.TrimSpace(line) == "":
+		case strings.TrimSpace(lines[i]) == "":
 			blocks = append(blocks, block{kind: blankBlock})
 			i++
-		case r.CodeBlock.MatchString(line):
+		case r.CodeBlock.MatchString(lines[i]):
 			var codeLines []string
-			codeLines = append(codeLines, line) // opening ```
+			codeLines = append(codeLines, lines[i]) // opening ```
 			i++
 			for i < len(lines) && !r.CodeBlock.MatchString(lines[i]) {
 				codeLines = append(codeLines, lines[i])
@@ -99,7 +98,7 @@ func groupBlocks(lines []string) []block {
 				i++
 			}
 			blocks = append(blocks, block{kind: codeBlock, lines: codeLines})
-		case r.ListItem.MatchString(line):
+		case r.ListItem.MatchString(lines[i]):
 			var listLines []string
 			for i < len(lines) && r.ListItem.MatchString(lines[i]) {
 				listLines = append(listLines, lines[i])
@@ -107,7 +106,7 @@ func groupBlocks(lines []string) []block {
 			}
 			blocks = append(blocks, block{kind: listBlock, lines: listLines})
 		default:
-			blocks = append(blocks, block{kind: textBlock, lines: []string{line}})
+			blocks = append(blocks, block{kind: textBlock, lines: []string{lines[i]}})
 			i++
 		}
 	}
