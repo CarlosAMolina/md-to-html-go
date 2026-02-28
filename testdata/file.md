@@ -33,9 +33,9 @@ Link to a [website](https://cmoli.es).
 
 [This line only contains a link](https://cmoli.es)
 
-Link to a [file](../testdata/output.html).
+Link to a [file](../testdata/file.html).
 
-[This line only contains a link to a file](../testdata/output.html)
+[This line only contains a link to a file](../testdata/file.html)
 
 Unordered list:
 

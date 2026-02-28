@@ -7,11 +7,11 @@ import (
 )
 
 func TestConvertFile(t *testing.T) {
-	result, err := ConvertFile("testdata/input.md")
+	result, err := ConvertFile("testdata/file.md")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	expected, err := os.ReadFile("testdata/output.html")
+	expected, err := os.ReadFile("testdata/file.html")
 	if err != nil {
 		t.Fatalf("error opening file: %v", err)
 	}

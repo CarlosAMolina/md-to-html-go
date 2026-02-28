@@ -7,7 +7,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: md-to-html <input.md>")
+		fmt.Fprintln(os.Stderr, "usage: md-to-html <file.md>")
 		os.Exit(1)
 	}
 	result, err := ConvertFile(os.Args[1])
