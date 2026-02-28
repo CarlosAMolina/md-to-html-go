@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	"os"
 	"regexp"
 	"strings"
 )
@@ -25,11 +22,7 @@ type block struct {
 
 var r = newRegex()
 
-func ConvertLines(path string) (string, error) {
-	lines, err := readLines(path)
-	if err != nil {
-		return "", err
-	}
+func convertLines(lines []string) string {
 	blocks := groupBlocks(lines)
 	parts := make([]string, 0, len(blocks))
 	for _, b := range blocks {
@@ -46,24 +39,7 @@ func ConvertLines(path string) (string, error) {
 			parts = append(parts, r.convert(b.lines[0]))
 		}
 	}
-	return strings.TrimSpace(strings.Join(parts, "\n")), nil
-}
-
-func readLines(path string) ([]string, error) {
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, fmt.Errorf("error opening file: %w", err)
-	}
-	defer file.Close()
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("error reading file: %w", err)
-	}
-	return lines, nil
+	return strings.TrimSpace(strings.Join(parts, "\n"))
 }
 
 func groupBlocks(lines []string) []block {
