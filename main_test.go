@@ -61,6 +61,7 @@ func TestConvertFile(t *testing.T) {
 	}
 	expectedStr := strings.TrimSpace(string(expected))
 	if expectedStr != result {
-		t.Errorf("Not converted. Want:\n%v\nGot:\n%v", expectedStr, result)
+		_ = os.WriteFile("/tmp/result.html", []byte(result), 0644)
+		t.Errorf("Not converted. Want:\n%v\nGot:\n%v\n\nResult exported to /tmp/result.html", expectedStr, result)
 	}
 }

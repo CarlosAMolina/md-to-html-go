@@ -33,6 +33,8 @@ func convertFile(path string) (string, error) {
 	var sb strings.Builder
 	scanner := bufio.NewScanner(file)
 	skip := false
+	var ulIndentStack []int
+	prevIndent := -1
 	for scanner.Scan() {
 		line := scanner.Text()
 		var html string
@@ -41,13 +43,43 @@ func convertFile(path string) (string, error) {
 			html = r.ConvertCode(skip)
 		} else if skip {
 			html = line
+		} else if m := r.ListItem.FindStringSubmatch(line); m != nil {
+			indent := len(m[1])
+			if prevIndent == -1 || indent > prevIndent {
+				// TODO check why is necessary
+				if sb.Len() > 0 {
+					sb.WriteByte('\n')
+				}
+				sb.WriteString("<ul>")
+				ulIndentStack = append(ulIndentStack, indent)
+			} else if indent < prevIndent {
+				for len(ulIndentStack) > 0 && indent < ulIndentStack[len(ulIndentStack)-1] {
+					// TODO repeated in other parts
+					sb.WriteByte('\n')
+					sb.WriteString("</ul>")
+					ulIndentStack = ulIndentStack[:len(ulIndentStack)-1]
+				}
+			}
+			html = "<li>" + r.ConvertInline(strings.TrimSpace(m[2])) + "</li>"
+			prevIndent = indent
 		} else {
+			for len(ulIndentStack) > 0 {
+				sb.WriteByte('\n')
+				sb.WriteString("</ul>")
+				ulIndentStack = ulIndentStack[:len(ulIndentStack)-1]
+			}
+			prevIndent = -1
 			html = r.Convert(line)
 		}
 		if sb.Len() > 0 {
 			sb.WriteByte('\n')
 		}
 		sb.WriteString(html)
+	}
+	for len(ulIndentStack) > 0 {
+		sb.WriteByte('\n')
+		sb.WriteString("</ul>")
+		ulIndentStack = ulIndentStack[:len(ulIndentStack)-1]
 	}
 	if err := scanner.Err(); err != nil {
 		return "", fmt.Errorf("error reading file: %w", err)
@@ -66,6 +98,7 @@ type Regex struct {
 	H6         *regexp.Regexp
 	LinkInline *regexp.Regexp
 	LinkOnly   *regexp.Regexp
+	ListItem   *regexp.Regexp
 }
 
 func newRegex() *Regex {
@@ -80,6 +113,7 @@ func newRegex() *Regex {
 		H6:         regexp.MustCompile(`^######\s+(.*)`),
 		LinkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
 		LinkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
+		ListItem:   regexp.MustCompile(`^(\s*)- (.*)`),
 	}
 }
 
@@ -109,9 +143,14 @@ func (r *Regex) Convert(line string) string {
 	if r.LinkOnly.MatchString(line) {
 		return "<p>" + r.LinkOnly.ReplaceAllString(line, `<a href="$2">$1</a>`) + "</p>"
 	}
-	line = r.LinkInline.ReplaceAllString(line, `<a href="$2">$1</a>`)
-	line = r.CodeInline.ReplaceAllString(line, "<code>$1</code>")
+	line = r.ConvertInline(line)
 	return "<p>" + line + "</p>"
+}
+
+func (r *Regex) ConvertInline(text string) string {
+	text = r.LinkInline.ReplaceAllString(text, `<a href="$2">$1</a>`)
+	text = r.CodeInline.ReplaceAllString(text, "<code>$1</code>")
+	return text
 }
 
 func (r *Regex) ConvertCode(isStart bool) string {

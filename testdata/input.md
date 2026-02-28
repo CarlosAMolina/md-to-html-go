@@ -28,3 +28,12 @@ Link to a [website](https://cmoli.es).
 Link to a [file](../testdata/output.html).
 
 [This line only contains a link to a file](../testdata/output.html)
+
+Unordered list:
+
+- Element 1.
+  - Subelement 1.1.
+      - Subelement 1.1.1.
+          - Subelement 1.1.1.1.
+  - Subelement 1.2.
+- Element 2.
