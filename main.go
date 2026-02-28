@@ -8,7 +8,6 @@ import (
 	"strings"
 )
 
-// r is compiled once at startup and reused for all conversions.
 var r = newRegex()
 
 func main() {
@@ -65,6 +64,8 @@ type Regex struct {
 	H4         *regexp.Regexp
 	H5         *regexp.Regexp
 	H6         *regexp.Regexp
+	LinkInline *regexp.Regexp
+	LinkOnly   *regexp.Regexp
 }
 
 func newRegex() *Regex {
@@ -77,6 +78,8 @@ func newRegex() *Regex {
 		H4:         regexp.MustCompile(`^####\s+(.*)`),
 		H5:         regexp.MustCompile(`^#####\s+(.*)`),
 		H6:         regexp.MustCompile(`^######\s+(.*)`),
+		LinkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
+		LinkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
 	}
 }
 
@@ -102,6 +105,10 @@ func (r *Regex) Convert(line string) string {
 	if strings.TrimSpace(line) == "" {
 		return line
 	}
+	if r.LinkOnly.MatchString(line) {
+		return "<p>" + r.LinkOnly.ReplaceAllString(line, `<a href="$2">$1</a>`) + "</p>"
+	}
+	line = r.LinkInline.ReplaceAllString(line, `<a href="$2">$1</a>`)
 	line = r.CodeInline.ReplaceAllString(line, "<code>$1</code>")
 	return "<p>" + line + "</p>"
 }
