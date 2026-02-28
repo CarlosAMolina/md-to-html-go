@@ -11,11 +11,11 @@ import (
 type blockKind int
 
 const (
-	textBlock blockKind = iota
-	listBlock
+	blankBlock blockKind = iota
 	codeBlock
+	listBlock
 	tableBlock
-	blankBlock
+	textBlock
 )
 
 type block struct {
