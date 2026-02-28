@@ -28,6 +28,10 @@ func main() {
 			fmt.Fprintf(os.Stderr, "error writing %s: %v\n", f.output, err)
 			os.Exit(1)
 		}
+		if err := os.Remove(f.input); err != nil {
+			fmt.Fprintf(os.Stderr, "error removing %s: %v\n", f.input, err)
+			os.Exit(1)
+		}
 		fmt.Printf("%s -> %s\n", f.input, f.output)
 	}
 }
