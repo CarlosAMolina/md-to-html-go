@@ -1,5 +1,4 @@
 ## TODO
 
-- Add id to the titles (h1, h2...) to navigate when using a TOC.
-- Convert TOC.
+- Convert TOC and navigate to h1, h2, etc
 - Convert table.
