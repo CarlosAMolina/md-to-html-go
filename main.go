@@ -8,6 +8,20 @@ import (
 	"strings"
 )
 
+type blockKind int
+
+const (
+	textBlock blockKind = iota
+	listBlock
+	codeBlock
+	blankBlock
+)
+
+type block struct {
+	kind  blockKind
+	lines []string
+}
+
 var r = newRegex()
 
 func main() {
@@ -23,18 +37,26 @@ func main() {
 	fmt.Println(result)
 }
 
-type blockKind int
-
-const (
-	textBlock blockKind = iota
-	listBlock
-	codeBlock
-	blankBlock
-)
-
-type block struct {
-	kind  blockKind
-	lines []string
+func convertFile(path string) (string, error) {
+	lines, err := readLines(path)
+	if err != nil {
+		return "", err
+	}
+	blocks := groupBlocks(lines)
+	parts := make([]string, 0, len(blocks))
+	for _, b := range blocks {
+		switch b.kind {
+		case blankBlock:
+			parts = append(parts, "")
+		case codeBlock:
+			parts = append(parts, convertCodeBlock(b.lines))
+		case listBlock:
+			parts = append(parts, convertListBlock(b.lines))
+		case textBlock:
+			parts = append(parts, r.Convert(b.lines[0]))
+		}
+	}
+	return strings.TrimSpace(strings.Join(parts, "\n")), nil
 }
 
 func readLines(path string) ([]string, error) {
@@ -43,7 +65,6 @@ func readLines(path string) ([]string, error) {
 		return nil, fmt.Errorf("error opening file: %w", err)
 	}
 	defer file.Close()
-
 	var lines []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
@@ -91,29 +112,6 @@ func groupBlocks(lines []string) []block {
 		}
 	}
 	return blocks
-}
-
-func convertFile(path string) (string, error) {
-	lines, err := readLines(path)
-	if err != nil {
-		return "", err
-	}
-
-	blocks := groupBlocks(lines)
-	parts := make([]string, 0, len(blocks))
-	for _, b := range blocks {
-		switch b.kind {
-		case blankBlock:
-			parts = append(parts, "")
-		case codeBlock:
-			parts = append(parts, convertCodeBlock(b.lines))
-		case listBlock:
-			parts = append(parts, convertListBlock(b.lines))
-		case textBlock:
-			parts = append(parts, r.Convert(b.lines[0]))
-		}
-	}
-	return strings.TrimSpace(strings.Join(parts, "\n")), nil
 }
 
 func convertCodeBlock(lines []string) string {
