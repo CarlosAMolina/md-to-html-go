@@ -8,7 +8,7 @@ format:
 	go fmt .
 
 run:
-	go run .
+	cp -r testdata/md/ /tmp/ && go run . /tmp/md
 
 test:
 	go test -v
