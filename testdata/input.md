@@ -37,3 +37,10 @@ Unordered list:
           - Subelement 1.1.1.1.
   - Subelement 1.2.
 - Element 2.
+
+Table:
+
+column 1 | column 2
+---------|---------
+foo foo  | bar bar
+baz baz  | qux qux

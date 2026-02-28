@@ -14,6 +14,7 @@ const (
 	textBlock blockKind = iota
 	listBlock
 	codeBlock
+	tableBlock
 	blankBlock
 )
 
@@ -52,6 +53,8 @@ func convertFile(path string) (string, error) {
 			parts = append(parts, convertCodeBlock(b.lines))
 		case listBlock:
 			parts = append(parts, convertListBlock(b.lines))
+		case tableBlock:
+			parts = append(parts, convertTableBlock(b.lines))
 		case textBlock:
 			parts = append(parts, r.Convert(b.lines[0]))
 		}
@@ -104,6 +107,13 @@ func groupBlocks(lines []string) []block {
 				i++
 			}
 			blocks = append(blocks, block{kind: listBlock, lines: listLines})
+		case r.TableRow.MatchString(lines[i]):
+			var tableLines []string
+			for i < len(lines) && r.TableRow.MatchString(lines[i]) {
+				tableLines = append(tableLines, lines[i])
+				i++
+			}
+			blocks = append(blocks, block{kind: tableBlock, lines: tableLines})
 		default:
 			blocks = append(blocks, block{kind: textBlock, lines: []string{lines[i]}})
 			i++
@@ -155,6 +165,42 @@ func convertListBlock(lines []string) string {
 	return sb.String()
 }
 
+func convertTableBlock(lines []string) string {
+	var sb strings.Builder
+	sb.WriteString(`<table class="center">`)
+	// lines[0] = header, lines[1] = separator, lines[2:] = body rows
+	sb.WriteString("\n<thead>\n<tr>")
+	for _, cell := range splitTableRow(lines[0]) {
+		sb.WriteString("\n<th>" + cell + "</th>")
+	}
+	sb.WriteString("\n</tr>\n</thead>")
+	// TODO rm if
+	if len(lines) > 2 {
+		sb.WriteString("\n<tbody>")
+		for _, line := range lines[2:] {
+			sb.WriteString("\n<tr>")
+			for _, cell := range splitTableRow(line) {
+				sb.WriteString("\n<th>" + cell + "</th>")
+			}
+			sb.WriteString("\n</tr>")
+		}
+		sb.WriteString("\n</tbody>")
+	}
+	sb.WriteString("\n</table>")
+	return sb.String()
+}
+
+func splitTableRow(line string) []string {
+	raw := strings.Split(line, "|")
+	result := make([]string, 0, len(raw))
+	for _, cell := range raw {
+		if trimmed := strings.TrimSpace(cell); trimmed != "" {
+			result = append(result, trimmed)
+		}
+	}
+	return result
+}
+
 type Regex struct {
 	CodeBlock  *regexp.Regexp
 	CodeInline *regexp.Regexp
@@ -167,6 +213,7 @@ type Regex struct {
 	LinkInline *regexp.Regexp
 	LinkOnly   *regexp.Regexp
 	ListItem   *regexp.Regexp
+	TableRow   *regexp.Regexp
 }
 
 func newRegex() *Regex {
@@ -182,6 +229,7 @@ func newRegex() *Regex {
 		LinkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
 		LinkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
 		ListItem:   regexp.MustCompile(`^(\s*)- (.*)`),
+		TableRow:   regexp.MustCompile(`\|`),
 	}
 }
 
