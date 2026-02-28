@@ -7,7 +7,7 @@ import (
 )
 
 func TestConvertFile(t *testing.T) {
-	result, err := ConvertFile("testdata/file.md")
+	result, err := ConvertFile("testdata/md/file.md")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
