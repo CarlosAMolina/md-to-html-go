@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -17,8 +16,7 @@ func TestIsH1(t *testing.T) {
 		{"#Title", false},
 	}
 	for _, tt := range tests {
-		testname := fmt.Sprintf("%s", tt.str)
-		t.Run(testname, func(t *testing.T) {
+		t.Run(tt.str, func(t *testing.T) {
 			result := r.H1.MatchString(tt.str)
 			if tt.expected != result {
 				t.Errorf("want %t, got %t", tt.expected, result)
@@ -53,13 +51,16 @@ func TestIsH1(t *testing.T) {
 }
 
 func TestConvertFile(t *testing.T) {
-	result := convertFile("testdata/input.md")
+	result, err := convertFile("testdata/input.md")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
 	expected, err := os.ReadFile("testdata/output.html")
 	if err != nil {
-		panic(fmt.Errorf("Error opening file: %v", err))
+		t.Fatalf("error opening file: %v", err)
 	}
-	expected_str := strings.TrimSpace(string(expected))
-	if expected_str != result {
-		t.Errorf("Not converted. Want:\n%v\nGot:\n%v", expected_str, result)
+	expectedStr := strings.TrimSpace(string(expected))
+	if expectedStr != result {
+		t.Errorf("Not converted. Want:\n%v\nGot:\n%v", expectedStr, result)
 	}
 }
