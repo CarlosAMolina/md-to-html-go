@@ -107,7 +107,7 @@ func groupBlocks(lines []string) []block {
 				i++
 			}
 			blocks = append(blocks, block{kind: listBlock, lines: listLines})
-		case r.TableRow.MatchString(lines[i]):
+		case r.TableRow.MatchString(lines[i]) && i+1 < len(lines) && r.TableSep.MatchString(lines[i+1]):
 			var tableLines []string
 			for i < len(lines) && r.TableRow.MatchString(lines[i]) {
 				tableLines = append(tableLines, lines[i])
@@ -211,6 +211,7 @@ type Regex struct {
 	LinkOnly   *regexp.Regexp
 	ListItem   *regexp.Regexp
 	TableRow   *regexp.Regexp
+	TableSep   *regexp.Regexp
 }
 
 func newRegex() *Regex {
@@ -227,6 +228,7 @@ func newRegex() *Regex {
 		LinkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
 		ListItem:   regexp.MustCompile(`^(\s*)- (.*)`),
 		TableRow:   regexp.MustCompile(`\|`),
+		TableSep:   regexp.MustCompile(`^[\s\-|]+$`),
 	}
 }
 
