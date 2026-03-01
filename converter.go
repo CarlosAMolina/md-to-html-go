@@ -190,7 +190,6 @@ type regex struct {
 	linkInline    *regexp.Regexp
 	linkOnly      *regexp.Regexp
 	linkShort     *regexp.Regexp
-	linkShortOnly *regexp.Regexp
 	listItem      *regexp.Regexp
 	tableRow      *regexp.Regexp
 	tableSep      *regexp.Regexp
@@ -209,7 +208,6 @@ func newRegex() *regex {
 		linkInline:    regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
 		linkOnly:      regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
 		linkShort:     regexp.MustCompile(`<(https?://[^> ]+)>`),
-		linkShortOnly: regexp.MustCompile(`^<(https?://[^> ]+)>$`),
 		listItem:      regexp.MustCompile(`^(\s*)- (.*)`),
 		tableRow:      regexp.MustCompile(`\|`),
 		tableSep:      regexp.MustCompile(`^[\s\-|]+$`),
@@ -242,8 +240,8 @@ func (r *regex) convert(line string) string {
 	if r.linkOnly.MatchString(line) {
 		return "<p>" + r.linkOnly.ReplaceAllString(line, linkTemplate) + "</p>"
 	}
-	if r.linkShortOnly.MatchString(line) {
-		return "<p>" + r.linkShortOnly.ReplaceAllString(line, linkShortTemplate) + "</p>"
+	if r.linkShort.MatchString(line) {
+		return "<p>" + r.linkShort.ReplaceAllString(line, linkShortTemplate) + "</p>"
 	}
 	return "<p>" + r.convertInline(line) + "</p>"
 }
