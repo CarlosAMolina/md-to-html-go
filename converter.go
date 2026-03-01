@@ -16,6 +16,9 @@ const (
 	textBlock
 )
 
+const linkTemplate = `<a href="$2" class="uri">$1</a>`
+const linkShortTemplate = `<a href="$1" class="uri">$1</a>`
+
 type block struct {
 	kind  blockKind
 	lines []string
@@ -175,36 +178,40 @@ func splitTableRow(line string) []string {
 }
 
 type regex struct {
-	codeBlock  *regexp.Regexp
-	codeInline *regexp.Regexp
-	h1         *regexp.Regexp
-	h2         *regexp.Regexp
-	h3         *regexp.Regexp
-	h4         *regexp.Regexp
-	h5         *regexp.Regexp
-	h6         *regexp.Regexp
-	linkInline *regexp.Regexp
-	linkOnly   *regexp.Regexp
-	listItem   *regexp.Regexp
-	tableRow   *regexp.Regexp
-	tableSep   *regexp.Regexp
+	codeBlock     *regexp.Regexp
+	codeInline    *regexp.Regexp
+	h1            *regexp.Regexp
+	h2            *regexp.Regexp
+	h3            *regexp.Regexp
+	h4            *regexp.Regexp
+	h5            *regexp.Regexp
+	h6            *regexp.Regexp
+	linkInline    *regexp.Regexp
+	linkOnly      *regexp.Regexp
+	linkShort     *regexp.Regexp
+	linkShortOnly *regexp.Regexp
+	listItem      *regexp.Regexp
+	tableRow      *regexp.Regexp
+	tableSep      *regexp.Regexp
 }
 
 func newRegex() *regex {
 	return &regex{
-		codeBlock:  regexp.MustCompile("```.*"),
-		codeInline: regexp.MustCompile("`([^`]+)`"),
-		h1:         regexp.MustCompile(`^#\s+(.*)`),
-		h2:         regexp.MustCompile(`^##\s+(.*)`),
-		h3:         regexp.MustCompile(`^###\s+(.*)`),
-		h4:         regexp.MustCompile(`^####\s+(.*)`),
-		h5:         regexp.MustCompile(`^#####\s+(.*)`),
-		h6:         regexp.MustCompile(`^######\s+(.*)`),
-		linkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
-		linkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
-		listItem:   regexp.MustCompile(`^(\s*)- (.*)`),
-		tableRow:   regexp.MustCompile(`\|`),
-		tableSep:   regexp.MustCompile(`^[\s\-|]+$`),
+		codeBlock:     regexp.MustCompile("```.*"),
+		codeInline:    regexp.MustCompile("`([^`]+)`"),
+		h1:            regexp.MustCompile(`^#\s+(.*)`),
+		h2:            regexp.MustCompile(`^##\s+(.*)`),
+		h3:            regexp.MustCompile(`^###\s+(.*)`),
+		h4:            regexp.MustCompile(`^####\s+(.*)`),
+		h5:            regexp.MustCompile(`^#####\s+(.*)`),
+		h6:            regexp.MustCompile(`^######\s+(.*)`),
+		linkInline:    regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
+		linkOnly:      regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
+		linkShort:     regexp.MustCompile(`<(https?://[^> ]+)>`),
+		linkShortOnly: regexp.MustCompile(`^<(https?://[^> ]+)>$`),
+		listItem:      regexp.MustCompile(`^(\s*)- (.*)`),
+		tableRow:      regexp.MustCompile(`\|`),
+		tableSep:      regexp.MustCompile(`^[\s\-|]+$`),
 	}
 }
 
@@ -232,7 +239,10 @@ func (r *regex) convert(line string) string {
 		return heading("h1", m[1])
 	}
 	if r.linkOnly.MatchString(line) {
-		return "<p>" + r.linkOnly.ReplaceAllString(line, `<a href="$2" class="uri">$1</a>`) + "</p>"
+		return "<p>" + r.linkOnly.ReplaceAllString(line, linkTemplate) + "</p>"
+	}
+	if r.linkShortOnly.MatchString(line) {
+		return "<p>" + r.linkShortOnly.ReplaceAllString(line, linkShortTemplate) + "</p>"
 	}
 	return "<p>" + r.convertInline(line) + "</p>"
 }
@@ -243,7 +253,8 @@ func heading(tag, text string) string {
 }
 
 func (r *regex) convertInline(text string) string {
-	text = r.linkInline.ReplaceAllString(text, `<a href="$2" class="uri">$1</a>`)
+	text = r.linkInline.ReplaceAllString(text, linkTemplate)
+	text = r.linkShort.ReplaceAllString(text, linkShortTemplate)
 	text = r.codeInline.ReplaceAllString(text, "<code>$1</code>")
 	return text
 }
