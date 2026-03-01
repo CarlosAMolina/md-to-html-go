@@ -3,6 +3,7 @@ package main
 import (
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -177,40 +178,29 @@ func splitTableRow(line string) []string {
 	return result
 }
 
-// TODO instead of definde h1,h2,h3..., create a function that works with len of matched #
 type regex struct {
-	codeBlock     *regexp.Regexp
-	codeInline    *regexp.Regexp
-	h1            *regexp.Regexp
-	h2            *regexp.Regexp
-	h3            *regexp.Regexp
-	h4            *regexp.Regexp
-	h5            *regexp.Regexp
-	h6            *regexp.Regexp
-	linkInline    *regexp.Regexp
-	linkOnly      *regexp.Regexp
-	linkShort     *regexp.Regexp
-	listItem      *regexp.Regexp
-	tableRow      *regexp.Regexp
-	tableSep      *regexp.Regexp
+	codeBlock  *regexp.Regexp
+	codeInline *regexp.Regexp
+	h          *regexp.Regexp
+	linkInline *regexp.Regexp
+	linkOnly   *regexp.Regexp
+	linkShort  *regexp.Regexp
+	listItem   *regexp.Regexp
+	tableRow   *regexp.Regexp
+	tableSep   *regexp.Regexp
 }
 
 func newRegex() *regex {
 	return &regex{
-		codeBlock:     regexp.MustCompile("```.*"),
-		codeInline:    regexp.MustCompile("`([^`]+)`"),
-		h1:            regexp.MustCompile(`^#\s+(.*)`),
-		h2:            regexp.MustCompile(`^##\s+(.*)`),
-		h3:            regexp.MustCompile(`^###\s+(.*)`),
-		h4:            regexp.MustCompile(`^####\s+(.*)`),
-		h5:            regexp.MustCompile(`^#####\s+(.*)`),
-		h6:            regexp.MustCompile(`^######\s+(.*)`),
-		linkInline:    regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
-		linkOnly:      regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
-		linkShort:     regexp.MustCompile(`<(https?://[^> ]+)>`),
-		listItem:      regexp.MustCompile(`^(\s*)- (.*)`),
-		tableRow:      regexp.MustCompile(`\|`),
-		tableSep:      regexp.MustCompile(`^[\s\-|]+$`),
+		codeBlock:  regexp.MustCompile("```.*"),
+		codeInline: regexp.MustCompile("`([^`]+)`"),
+		h:          regexp.MustCompile(`^(#+)\s+(.*)`),
+		linkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
+		linkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
+		linkShort:  regexp.MustCompile(`<(https?://[^> ]+)>`),
+		listItem:   regexp.MustCompile(`^(\s*)- (.*)`),
+		tableRow:   regexp.MustCompile(`\|`),
+		tableSep:   regexp.MustCompile(`^[\s\-|]+$`),
 	}
 }
 
@@ -219,23 +209,9 @@ func (r *regex) convert(line string) string {
 	if line == "" {
 		return line
 	}
-	if m := r.h6.FindStringSubmatch(line); m != nil {
-		return heading("h6", m[1])
-	}
-	if m := r.h5.FindStringSubmatch(line); m != nil {
-		return heading("h5", m[1])
-	}
-	if m := r.h4.FindStringSubmatch(line); m != nil {
-		return heading("h4", m[1])
-	}
-	if m := r.h3.FindStringSubmatch(line); m != nil {
-		return heading("h3", m[1])
-	}
-	if m := r.h2.FindStringSubmatch(line); m != nil {
-		return heading("h2", m[1])
-	}
-	if m := r.h1.FindStringSubmatch(line); m != nil {
-		return heading("h1", m[1])
+	if r.h.MatchString(line) {
+		matches := r.h.FindStringSubmatch(line)
+		return heading(matches[1], matches[2])
 	}
 	if r.linkOnly.MatchString(line) {
 		return "<p>" + r.linkOnly.ReplaceAllString(line, linkTemplate) + "</p>"
@@ -246,9 +222,11 @@ func (r *regex) convert(line string) string {
 	return "<p>" + r.convertInline(line) + "</p>"
 }
 
-func heading(tag, text string) string {
+func heading(hashes string, text string) string {
+	count := len(hashes)
+	level := strconv.Itoa(count)
 	id := strings.ReplaceAll(strings.ToLower(text), " ", "-")
-	return "<" + tag + ` id="` + id + `">` + text + "</" + tag + ">"
+	return "<h" + level + ` id="` + id + `">` + text + "</h" + level + ">"
 }
 
 func (r *regex) convertInline(text string) string {

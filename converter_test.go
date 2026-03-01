@@ -33,40 +33,16 @@ func TestIsHeader(t *testing.T) {
 		expected bool
 	}{
 		{"# Title", true},
+		{"## Title", true},
 		{"#Title", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.str, func(t *testing.T) {
-			result := r.h1.MatchString(tt.str)
+			result := r.h.MatchString(tt.str)
 			if tt.expected != result {
 				t.Errorf("want %t, got %t", tt.expected, result)
 			}
 		})
-	}
-	str := "## Tittle"
-	result := r.h2.MatchString(str)
-	if !result {
-		t.Errorf("not matched %v", str)
-	}
-	str = "### Tittle"
-	result = r.h3.MatchString(str)
-	if !result {
-		t.Errorf("not matched %v", str)
-	}
-	str = "#### Tittle"
-	result = r.h4.MatchString(str)
-	if !result {
-		t.Errorf("not matched %v", str)
-	}
-	str = "##### Tittle"
-	result = r.h5.MatchString(str)
-	if !result {
-		t.Errorf("not matched %v", str)
-	}
-	str = "###### Tittle"
-	result = r.h6.MatchString(str)
-	if !result {
-		t.Errorf("not matched %v", str)
 	}
 }
 
