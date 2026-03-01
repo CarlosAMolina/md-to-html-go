@@ -23,6 +23,14 @@ func readLines(path string) ([]string, error) {
 	return lines, nil
 }
 
+func readContent(path string) (string, error) {
+	content, err := os.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("error opening file: %w", err)
+	}
+	return string(content), nil
+}
+
 func writeFile(path string, content string) error {
 	return os.WriteFile(path, []byte(content), 0644)
 }

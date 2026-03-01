@@ -11,18 +11,22 @@ func main() {
 		os.Exit(1)
 	}
 	dir := os.Args[1]
+	htmlTemplate, err := readContent("template.html")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error reading template.html: %v\n", err)
+		os.Exit(1)
+	}
 	files, err := collectFiles(dir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error walking directory: %v\n", err)
 		os.Exit(1)
 	}
 	for _, f := range files {
-		lines, err := readLines(f.input)
+		html, err := convertFileAsHtml(f.input, htmlTemplate)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error managing %s: %v\n", f.input, err)
+			fmt.Fprintf(os.Stderr, "error converting %s: %v\n", f.input, err)
 			os.Exit(1)
 		}
-		html := convertLines(lines)
 		if err := writeFile(f.output, html); err != nil {
 			fmt.Fprintf(os.Stderr, "error writing %s: %v\n", f.output, err)
 			os.Exit(1)

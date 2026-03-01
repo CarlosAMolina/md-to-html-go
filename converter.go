@@ -22,6 +22,16 @@ type block struct {
 
 var r = newRegex()
 
+// TODO test
+func convertFileAsHtml(file string, htmlTemplate string) (string, error) {
+	lines, err := readLines(file)
+	if err != nil {
+		return "", err
+	}
+	html := convertLines(lines)
+	return strings.Replace(htmlTemplate, "$body$", html, 1), nil
+}
+
 func convertLines(lines []string) string {
 	blocks := groupBlocks(lines)
 	parts := make([]string, 0, len(blocks))
