@@ -11,7 +11,7 @@ func TestConvertFileAsHtml(t *testing.T) {
 	if err != nil {
 		t.Fatalf("error opening file: %v", err)
 	}
-	result, err := convertFileAsHtml("testdata/md/file.md", htmlTemplate)
+	result, err := convertFileAsHtml("testdata/md/file.md", htmlTemplate, "testdata")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -26,7 +26,7 @@ func TestConvertFileAsHtml(t *testing.T) {
 	}
 }
 
-func TestIsH1(t *testing.T) {
+func TestIsHeader(t *testing.T) {
 	r := newRegex()
 	var tests = []struct {
 		str      string
@@ -67,5 +67,26 @@ func TestIsH1(t *testing.T) {
 	result = r.h6.MatchString(str)
 	if !result {
 		t.Errorf("not matched %v", str)
+	}
+}
+
+func TestCalculateRootRelativePath(t *testing.T) {
+	var tests = []struct {
+		file     string
+		expected string
+	}{
+		{"foo/file.md", "."},
+		{"foo/bar/file.md", ".."},
+		{"foo/bar/baz/file.md", "../.."},
+		{"foo/bar/baz/qux/file.md", "../../.."},
+	}
+	root := "foo"
+	for _, tt := range tests {
+		t.Run(tt.file, func(t *testing.T) {
+			result := calculateRootRelativePath(tt.file, root)
+			if tt.expected != result {
+				t.Errorf("want %s, got %s", tt.expected, result)
+			}
+		})
 	}
 }

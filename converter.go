@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -22,13 +23,15 @@ type block struct {
 
 var r = newRegex()
 
-func convertFileAsHtml(file string, htmlTemplate string) (string, error) {
+func convertFileAsHtml(file string, htmlTemplate string, root string) (string, error) {
 	lines, err := readLines(file)
 	if err != nil {
 		return "", err
 	}
 	result := convertLines(lines)
 	result = strings.Replace(htmlTemplate, "$body$", result, 1)
+	relativePath := calculateRootRelativePath(file, root)
+	result = strings.ReplaceAll(result, "$rootDirectoryRelativePathName$", relativePath)
 	return strings.TrimSpace(result), nil
 }
 
@@ -243,4 +246,17 @@ func (r *regex) convertInline(text string) string {
 	text = r.linkInline.ReplaceAllString(text, `<a href="$2">$1</a>`)
 	text = r.codeInline.ReplaceAllString(text, "<code>$1</code>")
 	return text
+}
+
+func calculateRootRelativePath(file string, root string) string {
+	dir := filepath.Dir(file)
+	rel, err := filepath.Rel(root, dir)
+	if err != nil || rel == "." {
+		return "."
+	}
+	parts := strings.Split(rel, string(filepath.Separator))
+	for i := range parts {
+		parts[i] = ".."
+	}
+	return filepath.Join(parts...)
 }

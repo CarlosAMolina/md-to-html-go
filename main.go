@@ -22,7 +22,7 @@ func main() {
 		os.Exit(1)
 	}
 	for _, f := range files {
-		html, err := convertFileAsHtml(f.input, htmlTemplate)
+		html, err := convertFileAsHtml(f.input, htmlTemplate, dir)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error converting %s: %v\n", f.input, err)
 			os.Exit(1)
