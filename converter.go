@@ -41,7 +41,7 @@ func convertLines(lines []string) string {
 	for _, b := range blocks {
 		switch b.kind {
 		case blankBlock:
-			parts = append(parts, "")
+			continue
 		case codeBlock:
 			parts = append(parts, convertCodeBlock(b.lines))
 		case listBlock:
