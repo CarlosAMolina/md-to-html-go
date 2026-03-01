@@ -22,14 +22,14 @@ type block struct {
 
 var r = newRegex()
 
-// TODO test
 func convertFileAsHtml(file string, htmlTemplate string) (string, error) {
 	lines, err := readLines(file)
 	if err != nil {
 		return "", err
 	}
-	html := convertLines(lines)
-	return strings.Replace(htmlTemplate, "$body$", html, 1), nil
+	result := convertLines(lines)
+	result = strings.Replace(htmlTemplate, "$body$", result, 1)
+	return strings.TrimSpace(result), nil
 }
 
 func convertLines(lines []string) string {

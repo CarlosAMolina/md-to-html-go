@@ -6,12 +6,15 @@ import (
 	"testing"
 )
 
-func TestConvertLines(t *testing.T) {
-	lines, err := readLines("testdata/md/file.md")
+func TestConvertFileAsHtml(t *testing.T) {
+	htmlTemplate, err := readContent("template.html")
+	if err != nil {
+		t.Fatalf("error opening file: %v", err)
+	}
+	result, err := convertFileAsHtml("testdata/md/file.md", htmlTemplate)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	result := convertLines(lines)
 	expected, err := os.ReadFile("testdata/file.html")
 	if err != nil {
 		t.Fatalf("error opening file: %v", err)
