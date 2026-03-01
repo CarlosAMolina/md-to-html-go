@@ -232,7 +232,7 @@ func (r *regex) convert(line string) string {
 		return heading("h1", m[1])
 	}
 	if r.linkOnly.MatchString(line) {
-		return "<p>" + r.linkOnly.ReplaceAllString(line, `<a href="$2">$1</a>`) + "</p>"
+		return "<p>" + r.linkOnly.ReplaceAllString(line, `<a href="$2" class="uri">$1</a>`) + "</p>"
 	}
 	return "<p>" + r.convertInline(line) + "</p>"
 }
@@ -243,7 +243,7 @@ func heading(tag, text string) string {
 }
 
 func (r *regex) convertInline(text string) string {
-	text = r.linkInline.ReplaceAllString(text, `<a href="$2">$1</a>`)
+	text = r.linkInline.ReplaceAllString(text, `<a href="$2" class="uri">$1</a>`)
 	text = r.codeInline.ReplaceAllString(text, "<code>$1</code>")
 	return text
 }
