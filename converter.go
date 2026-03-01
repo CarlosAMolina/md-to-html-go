@@ -177,6 +177,7 @@ func splitTableRow(line string) []string {
 	return result
 }
 
+// TODO instead of definde h1,h2,h3..., create a function that works with len of matched #
 type regex struct {
 	codeBlock     *regexp.Regexp
 	codeInline    *regexp.Regexp
