@@ -212,6 +212,7 @@ func (r *regex) convert(line string) string {
 		return line
 	}
 	if r.blockquote.MatchString(line) {
+		line = r.convertInline(line)
 		return r.blockquote.ReplaceAllString(line, "<blockquote>\n<p>$1</p>\n</blockquote>")
 	}
 	if r.h.MatchString(line) {
