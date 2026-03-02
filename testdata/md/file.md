@@ -55,4 +55,4 @@ baz baz  | qux qux
 
 This line has the character used in tables: |. But is not a table.
 
-> This is a blockquote with an [url](https://cmoli.es).
+> This is a blockquote with an [url](https://cmoli.es) and `a piece of code`.
