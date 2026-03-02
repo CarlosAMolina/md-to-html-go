@@ -54,3 +54,5 @@ foo foo  | bar bar
 baz baz  | qux qux
 
 This line has the character used in tables: |. But is not a table.
+
+> This is a blockquote.

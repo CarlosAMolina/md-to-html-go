@@ -179,6 +179,7 @@ func splitTableRow(line string) []string {
 }
 
 type regex struct {
+	blockquote *regexp.Regexp
 	codeBlock  *regexp.Regexp
 	codeInline *regexp.Regexp
 	h          *regexp.Regexp
@@ -192,6 +193,7 @@ type regex struct {
 
 func newRegex() *regex {
 	return &regex{
+		blockquote: regexp.MustCompile(`>\s+(.*)`),
 		codeBlock:  regexp.MustCompile("```.*"),
 		codeInline: regexp.MustCompile("`([^`]+)`"),
 		h:          regexp.MustCompile(`^(#+)\s+(.*)`),
@@ -208,6 +210,9 @@ func (r *regex) convert(line string) string {
 	line = strings.TrimSpace(line)
 	if line == "" {
 		return line
+	}
+	if r.blockquote.MatchString(line) {
+		return r.blockquote.ReplaceAllString(line, "<blockquote>\n<p>$1</p>\n</blockquote>")
 	}
 	if r.h.MatchString(line) {
 		matches := r.h.FindStringSubmatch(line)
