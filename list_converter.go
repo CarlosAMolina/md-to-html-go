@@ -5,6 +5,7 @@ import "strings"
 type listEntry struct {
 	indent   int
 	listType string
+	liOpen   bool
 }
 
 func writeListTag(sb *strings.Builder, s string) {
@@ -29,30 +30,52 @@ func convertListBlock(lines []string) string {
 			targetType = "ol"
 		}
 
-		// Pop entries that are deeper than current indent
+		// Pop entries deeper than current indent, closing their open <li> first
 		for len(stack) > 0 && stack[len(stack)-1].indent > indent {
-			writeListTag(&sb, "</"+stack[len(stack)-1].listType+">")
+			top := stack[len(stack)-1]
+			if top.liOpen {
+				writeListTag(&sb, "</li>")
+			}
+			writeListTag(&sb, "</"+top.listType+">")
 			stack = stack[:len(stack)-1]
 		}
 
-		// Open a new list when going deeper or starting fresh
-		if len(stack) == 0 || stack[len(stack)-1].indent < indent {
-			writeListTag(&sb, "<"+targetType+">")
-			stack = append(stack, listEntry{indent: indent, listType: targetType})
-		} else if stack[len(stack)-1].listType != targetType {
-			// Same indent level but different list type: swap the list
-			writeListTag(&sb, "</"+stack[len(stack)-1].listType+">")
-			stack = stack[:len(stack)-1]
+		if len(stack) > 0 && stack[len(stack)-1].indent == indent {
+			if stack[len(stack)-1].listType != targetType {
+				// Same indent, different type: close current list and open new one
+				top := stack[len(stack)-1]
+				if top.liOpen {
+					writeListTag(&sb, "</li>")
+				}
+				writeListTag(&sb, "</"+top.listType+">")
+				stack = stack[:len(stack)-1]
+				writeListTag(&sb, "<"+targetType+">")
+				stack = append(stack, listEntry{indent: indent, listType: targetType})
+			} else {
+				// Same indent, same type: close the previous open <li>
+				if stack[len(stack)-1].liOpen {
+					writeListTag(&sb, "</li>")
+					stack[len(stack)-1].liOpen = false
+				}
+			}
+		} else {
+			// Stack empty or top indent < current: going deeper or starting fresh
 			writeListTag(&sb, "<"+targetType+">")
 			stack = append(stack, listEntry{indent: indent, listType: targetType})
 		}
 
-		writeListTag(&sb, "<li>"+text+"</li>")
+		// Write the <li> without closing it yet
+		writeListTag(&sb, "<li>"+text)
+		stack[len(stack)-1].liOpen = true
 	}
 
-	// Close all remaining open lists
+	// Close all remaining open lists (and their open <li>s)
 	for len(stack) > 0 {
-		writeListTag(&sb, "</"+stack[len(stack)-1].listType+">")
+		top := stack[len(stack)-1]
+		if top.liOpen {
+			writeListTag(&sb, "</li>")
+		}
+		writeListTag(&sb, "</"+top.listType+">")
 		stack = stack[:len(stack)-1]
 	}
 
