@@ -114,63 +114,6 @@ func convertCodeBlock(lines []string) string {
 	return sb.String()
 }
 
-func convertListBlock(lines []string) string {
-	type listEntry struct {
-		indent   int
-		listType string
-	}
-
-	var sb strings.Builder
-	var stack []listEntry
-
-	writeln := func(s string) {
-		if sb.Len() > 0 {
-			sb.WriteByte('\n')
-		}
-		sb.WriteString(s)
-	}
-
-	for _, line := range lines {
-		m := r.listItem.FindStringSubmatch(line)
-		indent := len(m[1])
-		marker := m[2]
-		text := r.convertInline(strings.TrimSpace(m[3]))
-
-		targetType := "ul"
-		if marker != "-" {
-			targetType = "ol"
-		}
-
-		// Pop entries that are deeper than current indent
-		for len(stack) > 0 && stack[len(stack)-1].indent > indent {
-			writeln("</" + stack[len(stack)-1].listType + ">")
-			stack = stack[:len(stack)-1]
-		}
-
-		// Open a new list when going deeper or starting fresh
-		if len(stack) == 0 || stack[len(stack)-1].indent < indent {
-			writeln("<" + targetType + ">")
-			stack = append(stack, listEntry{indent: indent, listType: targetType})
-		} else if stack[len(stack)-1].listType != targetType {
-			// Same indent level but different list type: swap the list
-			writeln("</" + stack[len(stack)-1].listType + ">")
-			stack = stack[:len(stack)-1]
-			writeln("<" + targetType + ">")
-			stack = append(stack, listEntry{indent: indent, listType: targetType})
-		}
-
-		writeln("<li>" + text + "</li>")
-	}
-
-	// Close all remaining open lists
-	for len(stack) > 0 {
-		writeln("</" + stack[len(stack)-1].listType + ">")
-		stack = stack[:len(stack)-1]
-	}
-
-	return sb.String()
-}
-
 func convertTableBlock(lines []string) string {
 	var sb strings.Builder
 	sb.WriteString(`<table class="center">`)
