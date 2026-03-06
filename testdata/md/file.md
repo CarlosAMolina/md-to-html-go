@@ -37,14 +37,10 @@ The following line is another one with only a link:
 
 <https://cmoli.es>
 
-Unordered list:
+List:
 
 - Element 1.
-  - Subelement 1.1.
-      - Subelement 1.1.1.
-          - Subelement 1.1.1.1.
-  - Subelement 1.2.
-- Element 2.
+  1. Subelement 1.1.
 
 Table:
 
