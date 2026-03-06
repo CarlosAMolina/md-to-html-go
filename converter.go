@@ -115,33 +115,59 @@ func convertCodeBlock(lines []string) string {
 }
 
 func convertListBlock(lines []string) string {
+	type listEntry struct {
+		indent   int
+		listType string
+	}
+
 	var sb strings.Builder
-	var indentStack []int
+	var stack []listEntry
+
+	writeln := func(s string) {
+		if sb.Len() > 0 {
+			sb.WriteByte('\n')
+		}
+		sb.WriteString(s)
+	}
+
 	for _, line := range lines {
 		m := r.listItem.FindStringSubmatch(line)
 		indent := len(m[1])
-		text := r.convertInline(strings.TrimSpace(m[2]))
-		if len(indentStack) == 0 || indent > indentStack[len(indentStack)-1] {
-			if sb.Len() > 0 {
-				sb.WriteByte('\n')
-			}
-			sb.WriteString("<ul>")
-			indentStack = append(indentStack, indent)
-		} else if indent < indentStack[len(indentStack)-1] {
-			for len(indentStack) > 0 && indent < indentStack[len(indentStack)-1] {
-				sb.WriteByte('\n')
-				sb.WriteString("</ul>")
-				indentStack = indentStack[:len(indentStack)-1]
-			}
+		marker := m[2]
+		text := r.convertInline(strings.TrimSpace(m[3]))
+
+		targetType := "ul"
+		if marker != "-" {
+			targetType = "ol"
 		}
-		sb.WriteByte('\n')
-		sb.WriteString("<li>" + text + "</li>")
+
+		// Pop entries that are deeper than current indent
+		for len(stack) > 0 && stack[len(stack)-1].indent > indent {
+			writeln("</" + stack[len(stack)-1].listType + ">")
+			stack = stack[:len(stack)-1]
+		}
+
+		// Open a new list when going deeper or starting fresh
+		if len(stack) == 0 || stack[len(stack)-1].indent < indent {
+			writeln("<" + targetType + ">")
+			stack = append(stack, listEntry{indent: indent, listType: targetType})
+		} else if stack[len(stack)-1].listType != targetType {
+			// Same indent level but different list type: swap the list
+			writeln("</" + stack[len(stack)-1].listType + ">")
+			stack = stack[:len(stack)-1]
+			writeln("<" + targetType + ">")
+			stack = append(stack, listEntry{indent: indent, listType: targetType})
+		}
+
+		writeln("<li>" + text + "</li>")
 	}
-	for len(indentStack) > 0 {
-		sb.WriteByte('\n')
-		sb.WriteString("</ul>")
-		indentStack = indentStack[:len(indentStack)-1]
+
+	// Close all remaining open lists
+	for len(stack) > 0 {
+		writeln("</" + stack[len(stack)-1].listType + ">")
+		stack = stack[:len(stack)-1]
 	}
+
 	return sb.String()
 }
 
@@ -200,7 +226,7 @@ func newRegex() *regex {
 		linkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
 		linkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
 		linkShort:  regexp.MustCompile(`<(https?://[^> ]+)>`),
-		listItem:   regexp.MustCompile(`^(\s*)- (.*)`),
+		listItem:   regexp.MustCompile(`^(\s*)([-]|\d+\.) (.*)`),
 		tableRow:   regexp.MustCompile(`\|`),
 		tableSep:   regexp.MustCompile(`^[\s\-|]+$`),
 	}
