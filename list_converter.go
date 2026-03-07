@@ -19,8 +19,32 @@ func convertListBlock(lines []string) string {
 	var sb strings.Builder
 	var stack []listEntry
 
-	for _, line := range lines {
+	i := 0
+	for i < len(lines) {
+		line := lines[i]
+
+		if strings.TrimSpace(line) == "" {
+			i++
+			continue
+		}
+
+		if isIndentedBlockquote(line) {
+			trimmed := strings.TrimSpace(line)
+			m := r.blockquote.FindStringSubmatch(trimmed)
+			if m != nil {
+				content := r.convertInline(m[1])
+				writeListTag(&sb, "<blockquote>\n<p>"+content+"</p>\n</blockquote>")
+			}
+			i++
+			continue
+		}
+
 		m := r.listItem.FindStringSubmatch(line)
+		if m == nil {
+			i++
+			continue
+		}
+
 		indent := len(m[1])
 		marker := m[2]
 		text := r.convertInline(strings.TrimSpace(m[3]))
@@ -64,9 +88,9 @@ func convertListBlock(lines []string) string {
 			stack = append(stack, listEntry{indent: indent, listType: targetType})
 		}
 
-		// Write the <li> without closing it yet
 		writeListTag(&sb, "<li>"+text)
 		stack[len(stack)-1].liOpen = true
+		i++
 	}
 
 	// Close all remaining open lists (and their open <li>s)

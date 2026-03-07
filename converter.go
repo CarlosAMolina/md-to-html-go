@@ -82,9 +82,28 @@ func groupBlocks(lines []string) []block {
 			blocks = append(blocks, block{kind: codeBlock, lines: codeLines})
 		case r.listItem.MatchString(lines[i]):
 			var listLines []string
-			for i < len(lines) && r.listItem.MatchString(lines[i]) {
-				listLines = append(listLines, lines[i])
-				i++
+			for i < len(lines) {
+				if r.listItem.MatchString(lines[i]) {
+					listLines = append(listLines, lines[i])
+					i++
+				} else if strings.TrimSpace(lines[i]) == "" {
+					// Look ahead past all blanks; include this blank only if list content follows
+					j := i + 1
+					for j < len(lines) && strings.TrimSpace(lines[j]) == "" {
+						j++
+					}
+					if j < len(lines) && (r.listItem.MatchString(lines[j]) || isIndentedBlockquote(lines[j])) {
+						listLines = append(listLines, lines[i])
+						i++
+					} else {
+						break
+					}
+				} else if isIndentedBlockquote(lines[i]) {
+					listLines = append(listLines, lines[i])
+					i++
+				} else {
+					break
+				}
 			}
 			blocks = append(blocks, block{kind: listBlock, lines: listLines})
 		case r.tableRow.MatchString(lines[i]) && i+1 < len(lines) && r.tableSep.MatchString(lines[i+1]):
@@ -100,6 +119,10 @@ func groupBlocks(lines []string) []block {
 		}
 	}
 	return blocks
+}
+
+func isIndentedBlockquote(line string) bool {
+	return len(line) > 0 && line[0] == ' ' && r.blockquote.MatchString(strings.TrimSpace(line))
 }
 
 func convertCodeBlock(lines []string) string {
