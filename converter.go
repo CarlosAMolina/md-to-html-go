@@ -152,6 +152,7 @@ type regex struct {
 	codeBlock  *regexp.Regexp
 	codeInline *regexp.Regexp
 	h          *regexp.Regexp
+	image      *regexp.Regexp
 	linkInline *regexp.Regexp
 	linkOnly   *regexp.Regexp
 	linkShort  *regexp.Regexp
@@ -166,6 +167,7 @@ func newRegex() *regex {
 		codeBlock:  regexp.MustCompile("```.*"),
 		codeInline: regexp.MustCompile("`([^`]+)`"),
 		h:          regexp.MustCompile(`^(#+)\s+(.*)`),
+		image:      regexp.MustCompile(`!\[\]\((.*)\)`),
 		linkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
 		linkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
 		linkShort:  regexp.MustCompile(`<(https?://[^> ]+)>`),
@@ -205,6 +207,7 @@ func heading(hashes string, text string) string {
 }
 
 func (r *regex) convertInline(text string) string {
+	text = r.image.ReplaceAllString(text, "<img src=\"$1\" />")
 	text = r.linkInline.ReplaceAllString(text, linkTemplate)
 	text = r.linkShort.ReplaceAllString(text, linkShortTemplate)
 	text = r.codeInline.ReplaceAllString(text, "<code>$1</code>")
