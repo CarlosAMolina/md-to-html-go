@@ -167,7 +167,7 @@ func newRegex() *regex {
 		codeBlock:  regexp.MustCompile("```.*"),
 		codeInline: regexp.MustCompile("`([^`]+)`"),
 		h:          regexp.MustCompile(`^(#+)\s+(.*)`),
-		image:      regexp.MustCompile(`!\[\]\((.*)\)`),
+		image:      regexp.MustCompile(`!\[([^\]]*?)\]\(([^)]+)\)`),
 		linkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
 		linkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
 		linkShort:  regexp.MustCompile(`<(https?://[^> ]+)>`),
@@ -207,11 +207,26 @@ func heading(hashes string, text string) string {
 }
 
 func (r *regex) convertInline(text string) string {
-	text = r.image.ReplaceAllString(text, "<img src=\"$1\" />")
+	text = convertImage(text)
 	text = r.linkInline.ReplaceAllString(text, linkTemplate)
 	text = r.linkShort.ReplaceAllString(text, linkShortTemplate)
 	text = r.codeInline.ReplaceAllString(text, "<code>$1</code>")
 	return text
+}
+
+func convertImage(text string) string {
+	return r.image.ReplaceAllStringFunc(text, func(match string) string {
+		m := r.image.FindStringSubmatch(match)
+		if len(m) < 3 {
+			return match
+		}
+		alt := m[1]
+		src := m[2]
+		if alt == "" {
+			return `<img src="` + src + `" />`
+		}
+		return `<img src="` + src + `" alt="` + alt + `"/>`
+	})
 }
 
 func calculateRootRelativePath(file string, root string) string {

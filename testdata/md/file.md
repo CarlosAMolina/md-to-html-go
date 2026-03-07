@@ -56,3 +56,5 @@ This line has the character used in tables: |. But is not a table.
 Image:
 
 ![](favicon.ico)
+
+![with alt](favicon.ico)
