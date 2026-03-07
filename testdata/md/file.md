@@ -57,4 +57,6 @@ Image:
 
 ![](favicon.ico)
 
+Image with alt:
+
 ![with alt](favicon.ico)
