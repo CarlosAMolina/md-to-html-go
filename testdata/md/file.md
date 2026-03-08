@@ -14,11 +14,19 @@
 
 Foo bar.
 
+Multi line code:
+
 ```
 print('foo')
 
 # Comment here.
 print('bar')
+```
+
+Multi line code with code type:
+
+```bash
+foo
 ```
 
 This is `a piece of code` and this is `another one`.
@@ -52,7 +60,11 @@ List:
 
 1. b
 
-    b.1
+    Code in list:
+
+    ```
+    foo
+    ```
 
 Table:
 

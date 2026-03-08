@@ -93,6 +93,24 @@ func convertListBlock(lines []string) string {
 					}
 				} else if indentLevel > topIndent {
 					// Indented more than current list - continuation of current item
+					trimmedLine := strings.TrimSpace(line)
+					if r.codeBlock.MatchString(trimmedLine) {
+						var codeLines []string
+						codeLines = append(codeLines, trimmedLine)
+						i++
+						for i < len(lines) {
+							nextLine := lines[i]
+							codeLines = append(codeLines, strings.TrimSpace(nextLine))
+							if r.codeBlock.MatchString(strings.TrimSpace(nextLine)) {
+								i++
+								break
+							}
+							i++
+						}
+						codeOutput := convertCodeBlock(codeLines)
+						writeListTag(&sb, codeOutput)
+						continue
+					}
 					content := r.convertInline(strings.TrimSpace(line))
 					if hasBlankLines {
 						writeListTag(&sb, "<p>"+content+"</p>")
