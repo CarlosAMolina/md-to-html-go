@@ -131,12 +131,14 @@ func isIndentedBlockquote(line string) bool {
 
 func convertCodeBlock(lines []string) string {
 	var sb strings.Builder
-	sb.WriteString(`<pre class="sourceCode"><code>`)
+	sb.WriteString(`<pre class="sourceCode">
+<code>`)
 	for _, line := range lines[1 : len(lines)-1] { // skip opening and closing ```
-		sb.WriteByte('\n')
-		sb.WriteString(line)
+		if line != "" {
+			sb.WriteString(line)
+			sb.WriteByte('\n')
+		}
 	}
-	sb.WriteByte('\n')
 	sb.WriteString("</code></pre>")
 	return sb.String()
 }
