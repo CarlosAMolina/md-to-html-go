@@ -40,7 +40,8 @@ func TestConvertListBlock(t *testing.T) {
 		},
 		{
 			name: "list items with not list item paragraphs and blank lines",
-			lines: strings.Split(`1. a
+			lines: strings.Split(`
+1. a
     - a.1
 
       a.1.1
@@ -50,7 +51,6 @@ func TestConvertListBlock(t *testing.T) {
       a.2.2
 
     a.3
-
 
 1. b
 
