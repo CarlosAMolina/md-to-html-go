@@ -149,12 +149,17 @@ blockquote {
 }
 
 /* Not inline code */
-div.sourceCode {
+pre.sourceCode {
   background: var(--CODE-BACKGROUND-COLOR);
   border:1px solid var(--NOT-INLINE-CODE-BORDER-COLOR);
   border-radius:2px;
   overflow-y:hidden;
-  padding-left:10px;
+  padding-left: 5px;
+  padding: 10px;
+}
+
+pre.sourceCode code {
+  color: var(--NOT-INLINE-CODE-TEXT-COLOR);
 }
 
 /* Not inline code */
