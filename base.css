@@ -173,8 +173,8 @@ code {
   background: var(--CODE-BACKGROUND-COLOR);
   border-radius: 2px;
   color: var(--INLINE-CODE-TEXT-COLOR);
-  margin: 0px -3px;
-  padding: 0px 3px;
+  margin: 0;
+  padding: 2px 4px;
 }
 
 img {
