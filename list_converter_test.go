@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestConvertListBlock(t *testing.T) {
 	tests := []struct {
@@ -10,14 +13,12 @@ func TestConvertListBlock(t *testing.T) {
 	}{
 		{
 			name: "mixed ul and ol nesting",
-			lines: []string{
-				"- a",
-				"- b",
-				"  - c",
-				"    1. d",
-				"    2. e",
-				"- f",
-			},
+			lines: strings.Split(`- a
+- b
+  - c
+    1. d
+    2. e
+- f`, "\n"),
 			expected: `<ul>
 <li>a
 </li>
@@ -39,23 +40,21 @@ func TestConvertListBlock(t *testing.T) {
 		},
 		{
 			name: "list items with not list item paragraphs and blank lines",
-			lines: []string{
-				"1. a",
-				"    - a.1",
-				"",
-				"      a.1.1",
-				"",
-				"    - a.2",
-				"",
-				"      a.2.2",
-				"",
-				"    a.3",
-				"",
-				"",
-				"1. b",
-				"",
-				"    b.1",
-			},
+			lines: strings.Split(`1. a
+    - a.1
+
+      a.1.1
+
+    - a.2
+
+      a.2.2
+
+    a.3
+
+
+1. b
+
+    b.1`, "\n"),
 			expected: `<ol>
 <li><p>a</p>
 <ul>
@@ -83,12 +82,10 @@ func TestConvertListBlock(t *testing.T) {
 		},
 		{
 			name: "ul to ol type swap at same indent",
-			lines: []string{
-				"- a",
-				"- b",
-				"1. c",
-				"1. d",
-			},
+			lines: strings.Split(`- a
+- b
+1. c
+1. d`, "\n"),
 			expected: `<ul>
 <li>a
 </li>
@@ -104,12 +101,10 @@ func TestConvertListBlock(t *testing.T) {
 		},
 		{
 			name: "deep nesting then return to root",
-			lines: []string{
-				"- a",
-				"    - b",
-				"        - c",
-				"- d",
-			},
+			lines: strings.Split(`- a
+    - b
+        - c
+- d`, "\n"),
 			expected: `<ul>
 <li>a
 <ul>
@@ -127,12 +122,10 @@ func TestConvertListBlock(t *testing.T) {
 		},
 		{
 			name: "ol with nested ul child",
-			lines: []string{
-				"1. a",
-				"1. b",
-				"  - c",
-				"1. d",
-			},
+			lines: strings.Split(`1. a
+1. b
+  - c
+1. d`, "\n"),
 			expected: `<ol>
 <li>a
 </li>
