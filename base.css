@@ -154,12 +154,12 @@ pre.sourceCode {
   border:1px solid var(--NOT-INLINE-CODE-BORDER-COLOR);
   border-radius:2px;
   overflow-y:hidden;
-  padding-left: 5px;
   padding: 10px;
 }
 
 pre.sourceCode code {
   color: var(--NOT-INLINE-CODE-TEXT-COLOR);
+  display: block;
 }
 
 /* Not inline code */
