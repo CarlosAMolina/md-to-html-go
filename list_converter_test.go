@@ -38,6 +38,42 @@ func TestConvertListBlock(t *testing.T) {
 </ul>`,
 		},
 		{
+			name: "list items with not list item paragraphs and blank lines",
+			lines: []string{
+				"1. a",
+				"    - a.1",
+				"",
+				"      a.1.1",
+				"",
+				"    - a.2",
+				"",
+				"      a.2.2",
+				"",
+				"    a.3",
+				"",
+				"",
+				"1. b",
+				"",
+				"    b.1",
+			},
+			expected: `<ol>
+<li><p>a</p>
+<ul>
+<li><p>a.1</p>
+<p>a.1.1</p>
+</li>
+<li><p>a.2</p>
+<p>a.2.2</p>
+</li>
+</ul>
+<p>a.3</p>
+</li>
+<li><p>b</p>
+<p>b.1</p>
+</li>
+</ol>`,
+		},
+		{
 			name:  "single item",
 			lines: []string{"- only"},
 			expected: `<ul>

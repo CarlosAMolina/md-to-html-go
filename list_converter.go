@@ -19,6 +19,31 @@ func convertListBlock(lines []string) string {
 	var sb strings.Builder
 	var stack []listEntry
 
+	// Check if list has blank lines that indicate multiple paragraphs within items
+	// Count blank lines only if they're followed by regular content (not blockquotes)
+	hasBlankLines := false
+	for i, line := range lines {
+		if strings.TrimSpace(line) == "" {
+			// Check if next line is a blockquote or another list item
+			if i+1 < len(lines) {
+				nextLine := lines[i+1]
+				// If next is blockquote, don't count this blank as needing <p> wrapper
+				if isIndentedBlockquote(nextLine) {
+					continue
+				}
+				// If next is a list item at root level, don't count
+				if r.listItem.MatchString(nextLine) {
+					m := r.listItem.FindStringSubmatch(nextLine)
+					if m != nil && len(m[1]) == 0 { // root level list item
+						continue
+					}
+				}
+			}
+			hasBlankLines = true
+			break
+		}
+	}
+
 	i := 0
 	for i < len(lines) {
 		line := lines[i]
@@ -41,6 +66,36 @@ func convertListBlock(lines []string) string {
 
 		m := r.listItem.FindStringSubmatch(line)
 		if m == nil {
+			// Non-list-item line
+			if len(stack) > 0 {
+				indentLevel := getIndentLevel(line)
+				topIndent := stack[len(stack)-1].indent
+
+				// If indentation matches current list indent but it's not a list marker,
+				// we need to pop that list and treat this as parent continuation
+				if indentLevel == topIndent {
+					top := stack[len(stack)-1]
+					if top.liOpen {
+						writeListTag(&sb, "</li>")
+					}
+					writeListTag(&sb, "</"+top.listType+">")
+					stack = stack[:len(stack)-1]
+
+					// Now process as continuation of parent if there is one
+					if len(stack) > 0 {
+						content := r.convertInline(strings.TrimSpace(line))
+						if hasBlankLines {
+							writeListTag(&sb, "<p>"+content+"</p>")
+						}
+					}
+				} else if indentLevel > topIndent {
+					// Indented more than current list - continuation of current item
+					content := r.convertInline(strings.TrimSpace(line))
+					if hasBlankLines {
+						writeListTag(&sb, "<p>"+content+"</p>")
+					}
+				}
+			}
 			i++
 			continue
 		}
@@ -88,7 +143,11 @@ func convertListBlock(lines []string) string {
 			stack = append(stack, listEntry{indent: indent, listType: targetType})
 		}
 
-		writeListTag(&sb, "<li>"+text)
+		liContent := text
+		if hasBlankLines {
+			liContent = "<p>" + text + "</p>"
+		}
+		writeListTag(&sb, "<li>"+liContent)
 		stack[len(stack)-1].liOpen = true
 		i++
 	}
@@ -104,4 +163,13 @@ func convertListBlock(lines []string) string {
 	}
 
 	return sb.String()
+}
+
+func getIndentLevel(line string) int {
+	for i, ch := range line {
+		if ch != ' ' {
+			return i
+		}
+	}
+	return len(line)
 }
