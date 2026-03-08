@@ -92,13 +92,17 @@ func groupBlocks(lines []string) []block {
 					for j < len(lines) && strings.TrimSpace(lines[j]) == "" {
 						j++
 					}
-					if j < len(lines) && (r.listItem.MatchString(lines[j]) || isIndentedBlockquote(lines[j])) {
+					if j < len(lines) && (r.listItem.MatchString(lines[j]) || isIndentedBlockquote(lines[j]) || (len(lines[j]) > 0 && lines[j][0] == ' ')) {
 						listLines = append(listLines, lines[i])
 						i++
 					} else {
 						break
 					}
 				} else if isIndentedBlockquote(lines[i]) {
+					listLines = append(listLines, lines[i])
+					i++
+				} else if len(lines[i]) > 0 && lines[i][0] == ' ' {
+					// Indented content (continuation of list item)
 					listLines = append(listLines, lines[i])
 					i++
 				} else {

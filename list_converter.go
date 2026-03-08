@@ -20,27 +20,30 @@ func convertListBlock(lines []string) string {
 	var stack []listEntry
 
 	// Check if list has blank lines that indicate multiple paragraphs within items
-	// Count blank lines only if they're followed by regular content (not blockquotes)
+	// Blank lines should only trigger <p> wrapping if they separate actual content
+	// (not just blockquotes)
 	hasBlankLines := false
-	for i, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			// Check if next line is a blockquote or another list item
-			if i+1 < len(lines) {
-				nextLine := lines[i+1]
-				// If next is blockquote, don't count this blank as needing <p> wrapper
-				if isIndentedBlockquote(nextLine) {
-					continue
+	for i := 0; i < len(lines); i++ {
+		if strings.TrimSpace(lines[i]) == "" {
+			// Look ahead to see what follows the blank lines
+			j := i + 1
+			for j < len(lines) && strings.TrimSpace(lines[j]) == "" {
+				j++
+			}
+			// Only count as "blank lines for paragraph wrapping" if followed by
+			// non-blockquote content (either a list item or indented text)
+			if j < len(lines) {
+				nextLine := lines[j]
+				if !isIndentedBlockquote(nextLine) && r.listItem.MatchString(nextLine) {
+					hasBlankLines = true
+					break
 				}
-				// If next is a list item at root level, don't count
-				if r.listItem.MatchString(nextLine) {
-					m := r.listItem.FindStringSubmatch(nextLine)
-					if m != nil && len(m[1]) == 0 { // root level list item
-						continue
-					}
+				// Also trigger on indented non-blockquote text
+				if len(nextLine) > 0 && nextLine[0] == ' ' && !isIndentedBlockquote(nextLine) {
+					hasBlankLines = true
+					break
 				}
 			}
-			hasBlankLines = true
-			break
 		}
 	}
 

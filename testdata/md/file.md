@@ -39,8 +39,20 @@ The following line is another one with only a link:
 
 List:
 
-- Element 1.
-  1. Subelement 1.1.
+1. a
+    - a.1
+
+      a.1.1
+
+    - a.2
+
+      a.2.2
+
+    a.3
+
+1. b
+
+    b.1
 
 Table:
 
