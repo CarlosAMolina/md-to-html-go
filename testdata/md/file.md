@@ -85,6 +85,8 @@ A blockquote with indentation:
 
   > I am an indented blockquote.
 
+This is a line with the blockquote character > but this is not a blockquote.
+
 Image:
 
 ![](favicon.ico)

@@ -192,7 +192,7 @@ type regex struct {
 
 func newRegex() *regex {
 	return &regex{
-		blockquote: regexp.MustCompile(`>\s+(.*)`),
+		blockquote: regexp.MustCompile(`^\s*>\s+(.*)`),
 		codeBlock:  regexp.MustCompile("```.*"),
 		codeInline: regexp.MustCompile("`([^`]+)`"),
 		h:          regexp.MustCompile(`^(#+)\s+(.*)`),
