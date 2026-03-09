@@ -217,7 +217,7 @@ func (r *regex) convert(line string) string {
 	}
 	if r.h.MatchString(line) {
 		matches := r.h.FindStringSubmatch(line)
-		return heading(matches[1], matches[2])
+		return heading(r, matches[1], matches[2])
 	}
 	if r.linkOnly.MatchString(line) {
 		return "<p>" + r.linkOnly.ReplaceAllString(line, linkTemplate) + "</p>"
@@ -228,11 +228,19 @@ func (r *regex) convert(line string) string {
 	return "<p>" + r.convertInline(line) + "</p>"
 }
 
-func heading(hashes string, text string) string {
+func heading(r *regex, hashes string, text string) string {
 	count := len(hashes)
 	level := strconv.Itoa(count)
-	id := strings.ReplaceAll(strings.ToLower(text), " ", "-")
-	return "<h" + level + ` id="` + id + `">` + text + "</h" + level + ">"
+	convertedText := r.convertInline(text)
+	plainText := strings.ReplaceAll(text, "`", "")
+	var idChars strings.Builder
+	for _, ch := range plainText {
+		if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == ' ' || ch == '-' {
+			idChars.WriteRune(ch)
+		}
+	}
+	id := strings.ReplaceAll(strings.ToLower(idChars.String()), " ", "-")
+	return "<h" + level + ` id="` + id + `">` + convertedText + "</h" + level + ">"
 }
 
 func (r *regex) convertInline(text string) string {

@@ -3,12 +3,12 @@
 ## Table of contents
 
 - [Title 2](#title-2)
-  - [Title 3](#title-3)
+  - [Title 3. With `a code` word](#title-3-with-a-code-word)
 - [Text](#text)
 
 ## Title 2
 
-### Title 3
+### Title 3. With `a code` word
 
 ## Text
 
