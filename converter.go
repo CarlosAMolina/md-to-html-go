@@ -156,7 +156,7 @@ func convertTableBlock(lines []string) string {
 	for _, line := range lines[2:] {
 		sb.WriteString("\n<tr>")
 		for _, cell := range splitTableRow(line) {
-			sb.WriteString("\n<th>" + cell + "</th>")
+			sb.WriteString("\n<td>" + cell + "</td>")
 		}
 		sb.WriteString("\n</tr>")
 	}
