@@ -129,13 +129,15 @@ func isIndentedBlockquote(line string) bool {
 	return len(line) > 0 && line[0] == ' ' && r.blockquote.MatchString(strings.TrimSpace(line))
 }
 
+var htmlEscaper = strings.NewReplacer("<", "&lt;", ">", "&gt;")
+
 func convertCodeBlock(lines []string) string {
 	var sb strings.Builder
 	sb.WriteString(`<pre class="sourceCode">
 <code>`)
 	for _, line := range lines[1 : len(lines)-1] { // skip opening and closing ```
 		if line != "" {
-			sb.WriteString(line)
+			sb.WriteString(htmlEscaper.Replace(line))
 			sb.WriteByte('\n')
 		}
 	}
@@ -207,9 +209,8 @@ func newRegex() *regex {
 }
 
 func (r *regex) convert(line string) string {
-	line = strings.TrimSpace(line)
-	if line == "" {
-		return line
+	if strings.TrimSpace(line) == "" {
+		return ""
 	}
 	if r.blockquote.MatchString(line) {
 		line = r.convertInline(line)
@@ -247,7 +248,13 @@ func (r *regex) convertInline(text string) string {
 	text = convertImage(text)
 	text = r.linkInline.ReplaceAllString(text, linkTemplate)
 	text = r.linkShort.ReplaceAllString(text, linkShortTemplate)
-	text = r.codeInline.ReplaceAllString(text, "<code>$1</code>")
+	text = r.codeInline.ReplaceAllStringFunc(text, func(match string) string {
+		m := r.codeInline.FindStringSubmatch(match)
+		if len(m) < 2 {
+			return match
+		}
+		return "<code>" + htmlEscaper.Replace(m[1]) + "</code>"
+	})
 	return text
 }
 

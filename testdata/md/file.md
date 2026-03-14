@@ -87,6 +87,16 @@ A blockquote with indentation:
 
 This is a line with the blockquote character > but this is not a blockquote.
 
+Code and blockquote:
+
+```
+foo # <blockquote character and close character too>
+bar # <blockquote character
+baz # line after other line with open blockquote character
+```
+
+Inline code with blockquote character: `foo <bar`.
+
 Image:
 
 ![](favicon.ico)
