@@ -136,10 +136,8 @@ func convertCodeBlock(lines []string) string {
 	sb.WriteString(`<pre class="sourceCode">
 <code>`)
 	for _, line := range lines[1 : len(lines)-1] { // skip opening and closing ```
-		if line != "" {
-			sb.WriteString(htmlEscaper.Replace(line))
-			sb.WriteByte('\n')
-		}
+		sb.WriteString(htmlEscaper.Replace(line))
+		sb.WriteByte('\n')
 	}
 	sb.WriteString("</code></pre>")
 	return sb.String()
