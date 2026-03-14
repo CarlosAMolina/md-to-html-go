@@ -235,6 +235,7 @@ func heading(r *regex, hashes string, text string) string {
 	count := len(hashes)
 	level := strconv.Itoa(count)
 	convertedText := r.convertInline(text)
+	convertedText = strings.ReplaceAll(convertedText, `\_`, "_")
 
 	id := strings.ToLower(text)
 	id = strings.ReplaceAll(id, "`", "")

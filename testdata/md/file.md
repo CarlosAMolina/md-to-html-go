@@ -105,7 +105,7 @@ Image with alt:
 
 ![with alt](favicon.ico)
 
-## Underscore: \_\_init\_\_
+## Underscore: \_\_init__
 
 Italics: _init_.
 
