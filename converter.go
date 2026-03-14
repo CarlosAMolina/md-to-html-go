@@ -259,8 +259,15 @@ func (r *regex) convertInline(text string) string {
 
 	// 3. Protect images and links
 	var linkParts []string
-	reLink := regexp.MustCompile(`(!?\[.*?\]\(.*?\))|(<https?://[^> ]+>)`)
-	text = reLink.ReplaceAllStringFunc(text, func(match string) string {
+	text = r.image.ReplaceAllStringFunc(text, func(match string) string {
+		linkParts = append(linkParts, match)
+		return "\x02"
+	})
+	text = r.linkInline.ReplaceAllStringFunc(text, func(match string) string {
+		linkParts = append(linkParts, match)
+		return "\x02"
+	})
+	text = r.linkShort.ReplaceAllStringFunc(text, func(match string) string {
 		linkParts = append(linkParts, match)
 		return "\x02"
 	})
