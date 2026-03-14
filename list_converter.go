@@ -97,10 +97,23 @@ func convertListBlock(lines []string) string {
 					if r.codeBlock.MatchString(trimmedLine) {
 						var codeLines []string
 						codeLines = append(codeLines, trimmedLine)
+
+						// Identify base indentation from the opening ```
+						baseIndent := getIndentLevel(line)
+
 						i++
 						for i < len(lines) {
 							nextLine := lines[i]
-							codeLines = append(codeLines, strings.TrimSpace(nextLine))
+
+							// Strip only the base indentation
+							var content string
+							if len(nextLine) > baseIndent {
+								content = nextLine[baseIndent:]
+							} else {
+								content = strings.TrimSpace(nextLine)
+							}
+
+							codeLines = append(codeLines, content)
 							if r.codeBlock.MatchString(strings.TrimSpace(nextLine)) {
 								i++
 								break

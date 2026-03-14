@@ -235,14 +235,27 @@ func heading(r *regex, hashes string, text string) string {
 	count := len(hashes)
 	level := strconv.Itoa(count)
 	convertedText := r.convertInline(text)
-	plainText := strings.ReplaceAll(text, "`", "")
-	var idChars strings.Builder
-	for _, ch := range plainText {
-		if (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == ' ' || ch == '-' {
-			idChars.WriteRune(ch)
+
+	id := strings.ToLower(text)
+	id = strings.ReplaceAll(id, "`", "")
+
+	var sb strings.Builder
+	for _, ch := range id {
+		if (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' {
+			sb.WriteRune(ch)
+		} else {
+			sb.WriteRune('-')
 		}
 	}
-	id := strings.ReplaceAll(strings.ToLower(idChars.String()), " ", "-")
+	id = sb.String()
+
+	// Collapse multiple hyphens
+	reHyphens := regexp.MustCompile("-+")
+	id = reHyphens.ReplaceAllString(id, "-")
+
+	// Trim hyphens
+	id = strings.Trim(id, "-")
+
 	return "<h" + level + ` id="` + id + `">` + convertedText + "</h" + level + ">"
 }
 
