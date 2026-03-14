@@ -104,3 +104,11 @@ Image:
 Image with alt:
 
 ![with alt](favicon.ico)
+
+## Underscore
+
+Italics: _hi_.
+
+Bold: __hi__.
+
+Escape underscore: \_\_hi\_\_.

@@ -188,6 +188,8 @@ type regex struct {
 	listItem   *regexp.Regexp
 	tableRow   *regexp.Regexp
 	tableSep   *regexp.Regexp
+	bold       *regexp.Regexp
+	italics    *regexp.Regexp
 }
 
 func newRegex() *regex {
@@ -203,6 +205,8 @@ func newRegex() *regex {
 		listItem:   regexp.MustCompile(`^(\s*)([-]|\d+\.) (.*)`),
 		tableRow:   regexp.MustCompile(`\|`),
 		tableSep:   regexp.MustCompile(`^[\s\-|]+$`),
+		bold:       regexp.MustCompile(`__([^_]+)__`),
+		italics:    regexp.MustCompile(`_([^_]+)_`),
 	}
 }
 
@@ -243,16 +247,49 @@ func heading(r *regex, hashes string, text string) string {
 }
 
 func (r *regex) convertInline(text string) string {
-	text = convertImage(text)
-	text = r.linkInline.ReplaceAllString(text, linkTemplate)
-	text = r.linkShort.ReplaceAllString(text, linkShortTemplate)
+	// 1. Protect escaped underscores
+	text = strings.ReplaceAll(text, `\_`, "\x00")
+
+	// 2. Protect code inline
+	var codeParts []string
 	text = r.codeInline.ReplaceAllStringFunc(text, func(match string) string {
-		m := r.codeInline.FindStringSubmatch(match)
-		if len(m) < 2 {
-			return match
-		}
-		return "<code>" + htmlEscaper.Replace(m[1]) + "</code>"
+		codeParts = append(codeParts, match)
+		return "\x01"
 	})
+
+	// 3. Protect images and links
+	var linkParts []string
+	reLink := regexp.MustCompile(`(!?\[.*?\]\(.*?\))|(<https?://[^> ]+>)`)
+	text = reLink.ReplaceAllStringFunc(text, func(match string) string {
+		linkParts = append(linkParts, match)
+		return "\x02"
+	})
+
+	// 4. Handle Bold and Italics
+	text = r.bold.ReplaceAllString(text, "<strong>$1</strong>")
+	text = r.italics.ReplaceAllString(text, "<em>$1</em>")
+
+	// 5. Restore images and links and handle their conversion
+	for _, part := range linkParts {
+		processed := convertImage(part)
+		processed = r.linkInline.ReplaceAllString(processed, linkTemplate)
+		processed = r.linkShort.ReplaceAllString(processed, linkShortTemplate)
+		text = strings.Replace(text, "\x02", processed, 1)
+	}
+
+	// 6. Restore code and handle its conversion
+	for _, part := range codeParts {
+		m := r.codeInline.FindStringSubmatch(part)
+		processed := part
+		if len(m) >= 2 {
+			processed = "<code>" + htmlEscaper.Replace(m[1]) + "</code>"
+		}
+		text = strings.Replace(text, "\x01", processed, 1)
+	}
+
+	// 7. Restore escaped underscores
+	text = strings.ReplaceAll(text, "\x00", "_")
+
 	return text
 }
 
