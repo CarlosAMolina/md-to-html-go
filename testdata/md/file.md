@@ -107,8 +107,8 @@ Image with alt:
 
 ## Underscore
 
-Italics: _hi_.
+Italics: _init_.
 
-Bold: __hi__.
+Bold: __init__.
 
-Escape underscore: \_\_hi\_\_.
+Escaped underscore: \_\_init\_\_.
