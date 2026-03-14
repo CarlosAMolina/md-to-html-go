@@ -260,55 +260,62 @@ func heading(r *regex, hashes string, text string) string {
 }
 
 func (r *regex) convertInline(text string) string {
-	// 1. Protect escaped underscores
-	text = strings.ReplaceAll(text, `\_`, "\x00")
+	// 1. Protect BALANCED escaped underscores (these will have backslashes removed)
+	reBalancedBold := regexp.MustCompile(`\\_\\_([^_]+)\\_\\_`)
+	text = reBalancedBold.ReplaceAllString(text, "\x00\x00$1\x00\x00")
+	reBalancedItalics := regexp.MustCompile(`\\_([^_]+)\\_`)
+	text = reBalancedItalics.ReplaceAllString(text, "\x00$1\x00")
 
-	// 2. Protect code inline
+	// 2. Protect ALL OTHER escaped underscores (these will KEEP backslashes)
+	text = strings.ReplaceAll(text, `\_`, "\x01")
+
+	// 3. Protect code inline
 	var codeParts []string
 	text = r.codeInline.ReplaceAllStringFunc(text, func(match string) string {
 		codeParts = append(codeParts, match)
-		return "\x01"
+		return "\x02"
 	})
 
-	// 3. Protect images and links
+	// 4. Protect images and links
 	var linkParts []string
 	text = r.image.ReplaceAllStringFunc(text, func(match string) string {
 		linkParts = append(linkParts, match)
-		return "\x02"
+		return "\x03"
 	})
 	text = r.linkInline.ReplaceAllStringFunc(text, func(match string) string {
 		linkParts = append(linkParts, match)
-		return "\x02"
+		return "\x03"
 	})
 	text = r.linkShort.ReplaceAllStringFunc(text, func(match string) string {
 		linkParts = append(linkParts, match)
-		return "\x02"
+		return "\x03"
 	})
 
-	// 4. Handle Bold and Italics
+	// 5. Handle Bold and Italics
 	text = r.bold.ReplaceAllString(text, "<strong>$1</strong>")
 	text = r.italics.ReplaceAllString(text, "<em>$1</em>")
 
-	// 5. Restore images and links and handle their conversion
+	// 6. Restore images and links and handle their conversion
 	for _, part := range linkParts {
 		processed := convertImage(part)
 		processed = r.linkInline.ReplaceAllString(processed, linkTemplate)
 		processed = r.linkShort.ReplaceAllString(processed, linkShortTemplate)
-		text = strings.Replace(text, "\x02", processed, 1)
+		text = strings.Replace(text, "\x03", processed, 1)
 	}
 
-	// 6. Restore code and handle its conversion
+	// 7. Restore code and handle its conversion
 	for _, part := range codeParts {
 		m := r.codeInline.FindStringSubmatch(part)
 		processed := part
 		if len(m) >= 2 {
 			processed = "<code>" + htmlEscaper.Replace(m[1]) + "</code>"
 		}
-		text = strings.Replace(text, "\x01", processed, 1)
+		text = strings.Replace(text, "\x02", processed, 1)
 	}
 
-	// 7. Restore escaped underscores
-	text = strings.ReplaceAll(text, "\x00", "_")
+	// 8. Restore protected underscores
+	text = strings.ReplaceAll(text, "\x00", "_")   // Balanced: consume backslash
+	text = strings.ReplaceAll(text, "\x01", `\_`)  // Unbalanced: keep backslash
 
 	return text
 }

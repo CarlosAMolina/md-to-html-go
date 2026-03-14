@@ -113,6 +113,8 @@ Bold: __init__.
 
 Escaped underscore: \_\_init\_\_.
 
+Enough to escape first underscores: \_\_init__.
+
 Multi line code with underscore:
 
 ```
