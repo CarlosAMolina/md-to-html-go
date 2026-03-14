@@ -53,7 +53,7 @@ func convertLines(lines []string) string {
 		case tableBlock:
 			parts = append(parts, convertTableBlock(b.lines))
 		case textBlock:
-			parts = append(parts, r.convert(b.lines[0]))
+			parts = append(parts, r.convert(b.lines[0], true))
 		}
 	}
 	return strings.TrimSpace(strings.Join(parts, "\n"))
@@ -210,12 +210,12 @@ func newRegex() *regex {
 	}
 }
 
-func (r *regex) convert(line string) string {
+func (r *regex) convert(line string, keepBackslashes bool) string {
 	if strings.TrimSpace(line) == "" {
 		return ""
 	}
 	if r.blockquote.MatchString(line) {
-		line = r.convertInline(line)
+		line = r.convertInline(line, keepBackslashes)
 		return r.blockquote.ReplaceAllString(line, "<blockquote>\n<p>$1</p>\n</blockquote>")
 	}
 	if r.h.MatchString(line) {
@@ -228,13 +228,13 @@ func (r *regex) convert(line string) string {
 	if r.linkShort.MatchString(line) {
 		return "<p>" + r.linkShort.ReplaceAllString(line, linkShortTemplate) + "</p>"
 	}
-	return "<p>" + r.convertInline(line) + "</p>"
+	return "<p>" + r.convertInline(line, keepBackslashes) + "</p>"
 }
 
 func heading(r *regex, hashes string, text string) string {
 	count := len(hashes)
 	level := strconv.Itoa(count)
-	convertedText := r.convertInline(text)
+	convertedText := r.convertInline(text, false)
 	convertedText = strings.ReplaceAll(convertedText, `\_`, "_")
 
 	id := strings.ToLower(text)
@@ -260,7 +260,7 @@ func heading(r *regex, hashes string, text string) string {
 	return "<h" + level + ` id="` + id + `">` + convertedText + "</h" + level + ">"
 }
 
-func (r *regex) convertInline(text string) string {
+func (r *regex) convertInline(text string, keepBackslashes bool) string {
 	// 1. Protect BALANCED escaped underscores (these will have backslashes removed)
 	reBalancedBold := regexp.MustCompile(`\\_\\_([^_]+)\\_\\_`)
 	text = reBalancedBold.ReplaceAllString(text, "\x00\x00$1\x00\x00")
@@ -315,8 +315,12 @@ func (r *regex) convertInline(text string) string {
 	}
 
 	// 8. Restore protected underscores
-	text = strings.ReplaceAll(text, "\x00", "_")   // Balanced: consume backslash
-	text = strings.ReplaceAll(text, "\x01", `\_`)  // Unbalanced: keep backslash
+	text = strings.ReplaceAll(text, "\x00", "_") // Balanced: consume backslash
+	if keepBackslashes {
+		text = strings.ReplaceAll(text, "\x01", `\_`) // Unbalanced: keep backslash
+	} else {
+		text = strings.ReplaceAll(text, "\x01", "_") // Unbalanced: remove backslash
+	}
 
 	return text
 }

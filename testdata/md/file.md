@@ -124,3 +124,4 @@ __init__
 Inline code with underscore: `__init__`.
 
 - List element with escaped underscore: \_\_init\_\_.
+- Escape only first underscores: \_\_init__.
