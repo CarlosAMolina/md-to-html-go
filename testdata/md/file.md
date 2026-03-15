@@ -2,8 +2,8 @@
 
 ## Table of contents
 
-- [Title 2. With characters to maintain: ÁÉÍÓÚáéíóú](#title-2-with-characters-to-maintain-aeiouaeiou)
-  - [Title 3. With `a code` word](#title-3-with-a-code-word)
+- [Title 2. With characters to maintain: ÁÉÍÓÚáéíóú](#title-2.-with-characters-to-maintain:-áéíóúáéíóú)
+  - [Title 3. With `a code` word](#title-3.-with-a-code-word)
 - [Text](#text)
 
 ## Title 2. With characters to maintain: ÁÉÍÓÚáéíóú
@@ -106,6 +106,8 @@ Image with alt:
 ![with alt](favicon.ico)
 
 ## Underscore: \_\_init\_\_
+
+## \_\_init\_\_
 
 Italics: _init_.
 

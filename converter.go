@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode"
 )
 
 type blockKind int
@@ -242,27 +243,16 @@ func heading(r *regex, hashes string, text string) string {
 
 	id := strings.ToLower(text)
 	id = strings.ReplaceAll(id, "`", "")
-	id = strings.ReplaceAll(id, "á", "a")
-	id = strings.ReplaceAll(id, "é", "e")
-	id = strings.ReplaceAll(id, "í", "i")
-	id = strings.ReplaceAll(id, "ó", "o")
-	id = strings.ReplaceAll(id, "ú", "u")
 
 	var sb strings.Builder
 	for _, ch := range id {
-		if (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' {
+		if (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '_' || ch == '-' || ch == '.' || ch == ':' || unicode.IsLetter(ch) {
 			sb.WriteRune(ch)
 		} else {
 			sb.WriteRune('-')
 		}
 	}
 	id = sb.String()
-
-	// Collapse multiple hyphens
-	id = r.hyphens.ReplaceAllString(id, "-")
-
-	// Trim hyphens
-	id = strings.Trim(id, "-")
 
 	return "<h" + level + ` id="` + id + `">` + convertedText + "</h" + level + ">"
 }
