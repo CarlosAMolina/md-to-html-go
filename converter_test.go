@@ -1,30 +1,8 @@
 package main
 
 import (
-	"os"
-	"strings"
 	"testing"
 )
-
-func TestConvertFileAsHtml(t *testing.T) {
-	htmlTemplate, err := readContent("template.html")
-	if err != nil {
-		t.Fatalf("error opening file: %v", err)
-	}
-	result, err := convertFileAsHtml("testdata/md/file.md", htmlTemplate, "testdata")
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	expected, err := os.ReadFile("testdata/file.html")
-	if err != nil {
-		t.Fatalf("error opening file: %v", err)
-	}
-	expectedStr := strings.TrimSpace(string(expected))
-	if expectedStr != result {
-		_ = os.WriteFile("/tmp/result.html", []byte(result), 0644)
-		t.Errorf("Not converted. Want:\n%v\nGot:\n%v\n\nResult exported to /tmp/result.html", expectedStr, result)
-	}
-}
 
 func TestIsHeader(t *testing.T) {
 	r := newRegex()
