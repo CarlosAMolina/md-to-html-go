@@ -177,8 +177,6 @@ func splitTableRow(line string) []string {
 }
 
 type regex struct {
-	balancedBold    *regexp.Regexp
-	balancedItalics *regexp.Regexp
 	blockquote      *regexp.Regexp
 	bold            *regexp.Regexp
 	codeBlock       *regexp.Regexp
@@ -197,8 +195,6 @@ type regex struct {
 
 func newRegex() *regex {
 	return &regex{
-		balancedBold:    regexp.MustCompile(`\\_\\_([^_]+)\\_\\_`),
-		balancedItalics: regexp.MustCompile(`\\_([^_]+)\\_`),
 		blockquote:      regexp.MustCompile(`^\s*>\s+(.*)`),
 		bold:            regexp.MustCompile(`__([^_]+)__`),
 		codeBlock:       regexp.MustCompile("```.*"),
@@ -267,21 +263,17 @@ func heading(r *regex, hashes string, text string) string {
 }
 
 func (r *regex) convertInline(text string) string {
-	// 1. Protect BALANCED escaped underscores (these will have backslashes removed)
-	text = r.balancedBold.ReplaceAllString(text, "\x00\x00$1\x00\x00")
-	text = r.balancedItalics.ReplaceAllString(text, "\x00$1\x00")
-
-	// 2. Protect ALL OTHER escaped underscores (these will KEEP backslashes)
+	// Protect ALL OTHER escaped underscores (these will KEEP backslashes)
 	text = strings.ReplaceAll(text, `\_`, "\x01")
 
-	// 3. Protect code inline
+	// Protect code inline
 	var codeParts []string
 	text = r.codeInline.ReplaceAllStringFunc(text, func(match string) string {
 		codeParts = append(codeParts, match)
 		return "\x02"
 	})
 
-	// 4. Protect images and links
+	// Protect images and links
 	var linkParts []string
 	text = r.image.ReplaceAllStringFunc(text, func(match string) string {
 		linkParts = append(linkParts, match)
@@ -296,11 +288,11 @@ func (r *regex) convertInline(text string) string {
 		return "\x03"
 	})
 
-	// 5. Handle Bold and Italics
+	// Handle Bold and Italics
 	text = r.bold.ReplaceAllString(text, "<strong>$1</strong>")
 	text = r.italics.ReplaceAllString(text, "<em>$1</em>")
 
-	// 6. Restore images and links and handle their conversion
+	// Restore images and links and handle their conversion
 	for _, part := range linkParts {
 		processed := convertImage(part)
 		processed = r.linkInline.ReplaceAllString(processed, linkTemplate)
@@ -308,7 +300,7 @@ func (r *regex) convertInline(text string) string {
 		text = strings.Replace(text, "\x03", processed, 1)
 	}
 
-	// 7. Restore code and handle its conversion
+	// Restore code and handle its conversion
 	for _, part := range codeParts {
 		m := r.codeInline.FindStringSubmatch(part)
 		processed := part
