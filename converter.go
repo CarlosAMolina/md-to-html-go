@@ -177,36 +177,42 @@ func splitTableRow(line string) []string {
 }
 
 type regex struct {
-	blockquote *regexp.Regexp
-	bold       *regexp.Regexp
-	codeBlock  *regexp.Regexp
-	codeInline *regexp.Regexp
-	h          *regexp.Regexp
-	image      *regexp.Regexp
-	italics    *regexp.Regexp
-	linkInline *regexp.Regexp
-	linkOnly   *regexp.Regexp
-	linkShort  *regexp.Regexp
-	listItem   *regexp.Regexp
-	tableRow   *regexp.Regexp
-	tableSep   *regexp.Regexp
+	balancedBold    *regexp.Regexp
+	balancedItalics *regexp.Regexp
+	blockquote      *regexp.Regexp
+	bold            *regexp.Regexp
+	codeBlock       *regexp.Regexp
+	codeInline      *regexp.Regexp
+	h               *regexp.Regexp
+	hyphens         *regexp.Regexp
+	image           *regexp.Regexp
+	italics         *regexp.Regexp
+	linkInline      *regexp.Regexp
+	linkOnly        *regexp.Regexp
+	linkShort       *regexp.Regexp
+	listItem        *regexp.Regexp
+	tableRow        *regexp.Regexp
+	tableSep        *regexp.Regexp
 }
 
 func newRegex() *regex {
 	return &regex{
-		blockquote: regexp.MustCompile(`^\s*>\s+(.*)`),
-		bold:       regexp.MustCompile(`__([^_]+)__`),
-		codeBlock:  regexp.MustCompile("```.*"),
-		codeInline: regexp.MustCompile("`([^`]+)`"),
-		h:          regexp.MustCompile(`^(#+)\s+(.*)`),
-		image:      regexp.MustCompile(`!\[([^\]]*?)\]\(([^)]+)\)`),
-		italics:    regexp.MustCompile(`_([^_]+)_`),
-		linkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
-		linkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
-		linkShort:  regexp.MustCompile(`<(https?://[^> ]+)>`),
-		listItem:   regexp.MustCompile(`^(\s*)([-]|\d+\.) (.*)`),
-		tableRow:   regexp.MustCompile(`\|`),
-		tableSep:   regexp.MustCompile(`^[\s\-|]+$`),
+		balancedBold:    regexp.MustCompile(`\\_\\_([^_]+)\\_\\_`),
+		balancedItalics: regexp.MustCompile(`\\_([^_]+)\\_`),
+		blockquote:      regexp.MustCompile(`^\s*>\s+(.*)`),
+		bold:            regexp.MustCompile(`__([^_]+)__`),
+		codeBlock:       regexp.MustCompile("```.*"),
+		codeInline:      regexp.MustCompile("`([^`]+)`"),
+		h:               regexp.MustCompile(`^(#+)\s+(.*)`),
+		hyphens:         regexp.MustCompile("-+"),
+		image:           regexp.MustCompile(`!\[([^\]]*?)\]\(([^)]+)\)`),
+		italics:         regexp.MustCompile(`_([^_]+)_`),
+		linkInline:      regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
+		linkOnly:        regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
+		linkShort:       regexp.MustCompile(`<(https?://[^> ]+)>`),
+		listItem:        regexp.MustCompile(`^(\s*)([-]|\d+\.) (.*)`),
+		tableRow:        regexp.MustCompile(`\|`),
+		tableSep:        regexp.MustCompile(`^[\s\-|]+$`),
 	}
 }
 
@@ -252,8 +258,7 @@ func heading(r *regex, hashes string, text string) string {
 	id = sb.String()
 
 	// Collapse multiple hyphens
-	reHyphens := regexp.MustCompile("-+")
-	id = reHyphens.ReplaceAllString(id, "-")
+	id = r.hyphens.ReplaceAllString(id, "-")
 
 	// Trim hyphens
 	id = strings.Trim(id, "-")
@@ -263,10 +268,8 @@ func heading(r *regex, hashes string, text string) string {
 
 func (r *regex) convertInline(text string) string {
 	// 1. Protect BALANCED escaped underscores (these will have backslashes removed)
-	reBalancedBold := regexp.MustCompile(`\\_\\_([^_]+)\\_\\_`)
-	text = reBalancedBold.ReplaceAllString(text, "\x00\x00$1\x00\x00")
-	reBalancedItalics := regexp.MustCompile(`\\_([^_]+)\\_`)
-	text = reBalancedItalics.ReplaceAllString(text, "\x00$1\x00")
+	text = r.balancedBold.ReplaceAllString(text, "\x00\x00$1\x00\x00")
+	text = r.balancedItalics.ReplaceAllString(text, "\x00$1\x00")
 
 	// 2. Protect ALL OTHER escaped underscores (these will KEEP backslashes)
 	text = strings.ReplaceAll(text, `\_`, "\x01")
