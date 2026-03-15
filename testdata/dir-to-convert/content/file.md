@@ -37,9 +37,9 @@ Another web: <https://cmoli.es>.
 
 [This line only contains a link](https://cmoli.es)
 
-Link to a [file](../testdata/file.html).
+Link to a [file](subfolder/file-b.html).
 
-[This line only contains a link to a file](../testdata/file.html)
+[This line only contains a link to a file](subfolder/file-b.html)
 
 The following line is another one with only a link:
 
