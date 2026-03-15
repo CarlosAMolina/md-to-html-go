@@ -242,6 +242,11 @@ func heading(r *regex, hashes string, text string) string {
 
 	id := strings.ToLower(text)
 	id = strings.ReplaceAll(id, "`", "")
+	id = strings.ReplaceAll(id, "á", "a")
+	id = strings.ReplaceAll(id, "é", "e")
+	id = strings.ReplaceAll(id, "í", "i")
+	id = strings.ReplaceAll(id, "ó", "o")
+	id = strings.ReplaceAll(id, "ú", "u")
 
 	var sb strings.Builder
 	for _, ch := range id {
