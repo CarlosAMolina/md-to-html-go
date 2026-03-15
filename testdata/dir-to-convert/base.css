@@ -1,0 +1,224 @@
+:root {
+  --FONT-SIZE: 16px;
+  --FONT-FAMILY: sans-serif;
+  /* Basic colors. */
+  --BLUE-COLOR: #63c0f5;
+  --DARK-GREY-COLOR: #1a1a1a;
+  --BLACK-COLOR: #030303;
+  --LIGHT-GREEN-COLOR: #30ec30;
+  --GREEN-COLOR: #4caf50;
+  --GREEN-BLUE-COLOR: Teal;
+  --DARK-GREEN-COLOR: #3e8e41;
+  --GREY-COLOR: #aaa;
+  --LIGHT-DARK-GREY-COLOR: #292929;
+  --WHITE-COLOR: #eaeaea;
+  --LIGHT-WHITE-COLOR: #fff;
+  --DARK-PURPLE-COLOR: #aa759f;
+  --YELLOW-COLOR: #b5e853;
+  /* https://stackoverflow.com/questions/22252472/how-can-i-change-the-color-of-an-svg-element
+   * Convert a hexadecimal color code to a CSS filter:
+   * https://codepen.io/sosuke/pen/Pjoqqp
+  */
+  --GREY-COLOR-FILTER: invert(75%) sepia(0%) saturate(48%) hue-rotate(171deg) brightness(91%) contrast(90%);
+  --LIGHT-GREEN-COLOR-FILTER: invert(81%) sepia(42%) saturate(4152%) hue-rotate(66deg) brightness(101%) contrast(95%);
+  --DARK-GREEN-COLOR-FILTER: invert(41%) sepia(85%) saturate(326%) hue-rotate(72deg) brightness(95%) contrast(91%);
+  --WHITE-COLOR-FILTER: invert(99%) sepia(1%) saturate(2423%) hue-rotate(166deg) brightness(120%) contrast(84%);
+  /* Elements colors. */
+  --LIST-SYMBOL-COLOR: var(--YELLOW-COLOR);
+  --BUTTON-BACKGROUND-COLOR: var(--GREEN-COLOR);
+  --HOVER-BUTTON-BACKGROUND-COLOR: var(--DARK-GREEN-COLOR);
+  --CODE-BACKGROUND-COLOR: var(--BLACK-COLOR);
+  --HOVER-TABLE-BACKGROUND-COLOR: var(--GREEN-BLUE-COLOR);
+  --INPUT-BACKGROUND-COLOR: var(--WHITE-COLOR);
+  --PAGE-BACKGROUND-COLOR: var(--DARK-GREY-COLOR);
+  --NOT-INLINE-CODE-BORDER-COLOR: var(--LIGHT-DARK-GREY-COLOR);
+  --BLOCKQUOTE-BORDER-COLOR: var(--GREY-COLOR);
+  --MENU-BORDER-COLOR: var(--GREY-COLOR);
+  --FIELDSET-BORDER-COLOR: var(--LIGHT-GREEN-COLOR);
+  --INPUT-BORDER-COLOR: var(--YELLOW-COLOR);
+  --RADIO-INPUT-BORDER-COLOR: var(--LIGHT-GREEN-COLOR);
+  --CHECKED-RADIO-INPUT-BORDER-COLOR: var(--YELLOW-COLOR);
+  --GROUPS-BORDER-COLOR: var(--BLUE-COLOR);
+  --TABLE-BORDER-COLOR: var(--LIGHT-GREEN-COLOR);
+  --MENU-ICON-COLOR-FILTER: var(--WHITE-COLOR-FILTER);
+  --HOVER-MENU-ICON-COLOR-FILTER: var(--GREY-COLOR-FILTER);
+  --HOME-ICON-COLOR-FILTER: var(--LIGHT-GREEN-COLOR-FILTER);
+  --HOVER-HOME-ICON-COLOR-FILTER: var(--DARK-GREEN-COLOR-FILTER);
+  --TEXT-COLOR: var(--WHITE-COLOR);
+  --BLOCKQUOTE-TEXT-COLOR: var(--GREY-COLOR);
+  --BUTTON-TEXT-COLOR: var(--LIGHT-WHITE-COLOR);
+  --HYPERLINK-TEXT-COLOR: var(--BLUE-COLOR);
+  --INLINE-CODE-TEXT-COLOR: var(--DARK-PURPLE-COLOR);
+  --NOT-INLINE-CODE-TEXT-COLOR: var(--TEXT-COLOR);
+  --PUBLICATION-DATE-TEXT-COLOR: var(--GREY-COLOR);
+  --TITLE-TEXT-COLOR: var(--YELLOW-COLOR);
+}
+
+body {
+  background-color: var(--PAGE-BACKGROUND-COLOR);
+  color: var(--TEXT-COLOR);
+  font-family: var(--FONT-FAMILY);
+  font-size: var(--FONT-SIZE);
+  line-height: 1.5;
+  margin: 0 auto;
+  max-width: 1000px;
+  width: 90%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--TITLE-TEXT-COLOR);
+}
+
+button {
+  background-color: var(--BUTTON-BACKGROUND-COLOR);
+  border: none;
+  border-radius: 5px;
+  color: var(--BUTTON-TEXT-COLOR);
+  cursor: pointer;
+  font-size: var(--FONT-SIZE);
+  padding: 8px 30px;
+  text-align: center;
+}
+button:hover {
+  background-color: var(--HOVER-BUTTON-BACKGROUND-COLOR);
+}
+
+input[type=number] {
+  background-color: var(--INPUT-BACKGROUND-COLOR);
+  border-radius: 5px;
+  border: solid var(--INPUT-BORDER-COLOR);
+  padding: 4px 1px;
+  width: 10em;
+}
+input[type="radio"]{
+  appearance: none;
+  border: 2px solid var(--RADIO-INPUT-BORDER-COLOR);
+  border-radius: 50%;
+  height: 16px;
+  margin-right: 5px;
+  position: relative;
+  top: 2px;
+  transition: 0.2s all linear;
+  width: 16px;
+}
+input[type="radio"]:checked {
+  border: 6px solid var(--CHECKED-RADIO-INPUT-BORDER-COLOR);
+}
+
+fieldset {
+  border: 1px solid var(--FIELDSET-BORDER-COLOR);
+}
+fieldset legend {
+  padding: 6px;
+}
+
+a {
+  color: var(--HYPERLINK-TEXT-COLOR);
+  text-decoration: none;
+}
+a:hover, a:focus {
+  text-decoration: underline;
+}
+table {
+  border-collapse: collapse;
+  margin: 20px;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+th, td {
+  border: 1px solid var(--TABLE-BORDER-COLOR);
+  padding: 15px;
+}
+td {
+  text-align: center;
+}
+tr:hover {
+  background-color: var(--HOVER-TABLE-BACKGROUND-COLOR);
+}
+
+ul {
+  list-style-image: linear-gradient(var(--LIST-SYMBOL-COLOR), var(--LIST-SYMBOL-COLOR));
+}
+
+blockquote {
+ color: var(--BLOCKQUOTE-TEXT-COLOR);
+ border-left:1px dotted var(--BLOCKQUOTE-BORDER-COLOR);
+ padding-left:10px;
+}
+
+/* Not inline code */
+pre.sourceCode {
+  background: var(--CODE-BACKGROUND-COLOR);
+  border:1px solid var(--NOT-INLINE-CODE-BORDER-COLOR);
+  border-radius:2px;
+  overflow-y:hidden;
+  padding: 10px;
+}
+
+pre.sourceCode code {
+  color: var(--NOT-INLINE-CODE-TEXT-COLOR);
+  display: block;
+}
+
+/* Not inline code */
+code.sourceCode {
+  color: var(--NOT-INLINE-CODE-TEXT-COLOR);
+}
+
+/* TODO use same text color in all code (inline and not inline) */
+/* Inline code */
+code {
+  background: var(--CODE-BACKGROUND-COLOR);
+  border-radius: 2px;
+  color: var(--INLINE-CODE-TEXT-COLOR);
+  margin: 0;
+  padding: 2px 4px;
+}
+
+img {
+ max-width:100%
+}
+
+.menu {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+.menu-icons img {
+  min-width: 2rem;
+  position: relative;
+  top: 3px;
+  width: 2rem;
+}
+
+.svg-color {
+  filter: var(--MENU-ICON-COLOR-FILTER);
+}
+a img.svg-color:hover {
+  filter: var(--HOVER-MENU-ICON-COLOR-FILTER);
+}
+
+/* https://developer.mozilla.org/docs/Web/CSS/Attribute_selectors */
+.menu-icons img[src$="home.svg"] {
+  filter: var(--HOME-ICON-COLOR-FILTER);
+}
+.menu-icons img[src$="home.svg"]:hover {
+  filter: var(--HOVER-HOME-ICON-COLOR-FILTER);
+}
+
+.publication-date {
+  color: var(--PUBLICATION-DATE-TEXT-COLOR);
+  display: block;
+  margin-top: -.5rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.background-color{
+  background-color: var(--PAGE-BACKGROUND-COLOR);
+}
+
