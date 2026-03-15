@@ -178,38 +178,38 @@ func splitTableRow(line string) []string {
 }
 
 type regex struct {
-	blockquote      *regexp.Regexp
-	bold            *regexp.Regexp
-	codeBlock       *regexp.Regexp
-	codeInline      *regexp.Regexp
-	h               *regexp.Regexp
-	hyphens         *regexp.Regexp
-	image           *regexp.Regexp
-	italics         *regexp.Regexp
-	linkInline      *regexp.Regexp
-	linkOnly        *regexp.Regexp
-	linkShort       *regexp.Regexp
-	listItem        *regexp.Regexp
-	tableRow        *regexp.Regexp
-	tableSep        *regexp.Regexp
+	blockquote *regexp.Regexp
+	bold       *regexp.Regexp
+	codeBlock  *regexp.Regexp
+	codeInline *regexp.Regexp
+	h          *regexp.Regexp
+	hyphens    *regexp.Regexp
+	image      *regexp.Regexp
+	italics    *regexp.Regexp
+	linkInline *regexp.Regexp
+	linkOnly   *regexp.Regexp
+	linkShort  *regexp.Regexp
+	listItem   *regexp.Regexp
+	tableRow   *regexp.Regexp
+	tableSep   *regexp.Regexp
 }
 
 func newRegex() *regex {
 	return &regex{
-		blockquote:      regexp.MustCompile(`^\s*>\s+(.*)`),
-		bold:            regexp.MustCompile(`__([^_]+)__`),
-		codeBlock:       regexp.MustCompile("```.*"),
-		codeInline:      regexp.MustCompile("`([^`]+)`"),
-		h:               regexp.MustCompile(`^(#+)\s+(.*)`),
-		hyphens:         regexp.MustCompile("-+"),
-		image:           regexp.MustCompile(`!\[([^\]]*?)\]\(([^)]+)\)`),
-		italics:         regexp.MustCompile(`_([^_]+)_`),
-		linkInline:      regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
-		linkOnly:        regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
-		linkShort:       regexp.MustCompile(`<(https?://[^> ]+)>`),
-		listItem:        regexp.MustCompile(`^(\s*)([-]|\d+\.) (.*)`),
-		tableRow:        regexp.MustCompile(`\|`),
-		tableSep:        regexp.MustCompile(`^[\s\-|]+$`),
+		blockquote: regexp.MustCompile(`^\s*>\s+(.*)`),
+		bold:       regexp.MustCompile(`__([^_]+)__`),
+		codeBlock:  regexp.MustCompile("```.*"),
+		codeInline: regexp.MustCompile("`([^`]+)`"),
+		h:          regexp.MustCompile(`^(#+)\s+(.*)`),
+		hyphens:    regexp.MustCompile("-+"),
+		image:      regexp.MustCompile(`!\[([^\]]*?)\]\(([^)]+)\)`),
+		italics:    regexp.MustCompile(`_([^_]+)_`),
+		linkInline: regexp.MustCompile(`\[([^\]]+)\]\(([^\)]+)\)`),
+		linkOnly:   regexp.MustCompile(`^\[([^\]]+)\]\(([^\)]+)\)$`),
+		linkShort:  regexp.MustCompile(`<(https?://[^> ]+)>`),
+		listItem:   regexp.MustCompile(`^(\s*)([-]|\d+\.) (.*)`),
+		tableRow:   regexp.MustCompile(`\|`),
+		tableSep:   regexp.MustCompile(`^[\s\-|]+$`),
 	}
 }
 
