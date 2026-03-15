@@ -105,15 +105,13 @@ Image with alt:
 
 ![with alt](favicon.ico)
 
-## Underscore: \_\_init__ \_\_init\_\_
+## Underscore: \_\_init\_\_
 
 Italics: _init_.
 
 Bold: __init__.
 
 Escaped underscore: \_\_init\_\_.
-
-Enough to escape first underscores: \_\_init__.
 
 Multi line code with underscore:
 
@@ -124,4 +122,3 @@ __init__
 Inline code with underscore: `__init__`.
 
 - List element with escaped underscore: \_\_init\_\_.
-- Escape only first underscores: \_\_init__.

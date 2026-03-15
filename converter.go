@@ -310,9 +310,7 @@ func (r *regex) convertInline(text string) string {
 		text = strings.Replace(text, "\x02", processed, 1)
 	}
 
-	// 8. Restore protected underscores
-	text = strings.ReplaceAll(text, "\x00", "_") // Balanced: consume backslash
-	text = strings.ReplaceAll(text, "\x01", "_") // Unbalanced: remove backslash
+	text = strings.ReplaceAll(text, "\x01", "_")
 
 	return text
 }
