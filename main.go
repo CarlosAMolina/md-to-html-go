@@ -6,7 +6,12 @@ import (
 )
 
 func main() {
-	conf := newConfig()
+	if len(os.Args) < 2 {
+		fmt.Fprintln(os.Stderr, "usage: md-to-html-go <config-path>")
+		os.Exit(1)
+	}
+	configPath := os.Args[1]
+	conf := newConfig(configPath)
 	htmlTemplate, err := readContent("template.html")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error reading template.html: %v\n", err)

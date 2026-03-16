@@ -20,7 +20,7 @@ func TestMainGo(t *testing.T) {
 	if err := copyDir(testdataSrc, tmpDir); err != nil {
 		t.Fatalf("failed to copy %s to %s: %v", testdataSrc, tmpDir, err)
 	}
-	cmd := exec.Command("go", "run", ".")
+	cmd := exec.Command("go", "run", ".", "testdata/config.json")
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
