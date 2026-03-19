@@ -4,7 +4,7 @@
 
 **md-to-html-go** is a CLI tool that converts Markdown files to HTML. It walks a directory tree, reads `.md` files, transforms them to HTML using a template, and writes the output as `.html` files while removing the original `.md` files.
 
-**Key entry point:** `main.go` - accepts a JSON config path with the directory to convert.
+**Key entry point:** `main.go` - accepts the directory path as a command-line argument.
 
 ## Build & Test Commands
 
@@ -24,7 +24,8 @@ go test -run TestConvertLines  # Run a specific test
 ### Running
 ```bash
 make run            # Copies testdata to /tmp and runs the converter
-                    # Uses testdata/config.json which points to /tmp/dir-to-convert
+                    # go run . /tmp/dir-to-convert
+go run . /path/to/directory  # Run with your own directory
 ```
 
 ### Code Quality
@@ -38,8 +39,8 @@ go fmt .
 The conversion pipeline flows through these layers:
 
 1. **Configuration** (`configuration.go`)
-   - Reads JSON config file with a single `directory` field
-   - Minimal validation; errors exit immediately
+   - ~~Reads JSON config file with a single `directory` field~~
+   - **Removed:** Directory is now passed as a command-line argument directly
 
 2. **File Collection** (`collector.go`)
    - Walks the directory tree recursively
@@ -110,7 +111,6 @@ Tests follow standard Go conventions:
 - Focus on discrete conversions; the full pipeline is tested via `make run` with testdata
 
 ### Testdata Directory
-- `testdata/config.json` → Configuration file for manual testing
 - `testdata/dir-to-convert/` → Input Markdown files and assets
 - `testdata/dir-converted/` → Expected HTML output (reference for validation)
 

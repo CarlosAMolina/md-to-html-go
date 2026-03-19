@@ -8,7 +8,7 @@ format:
 	go fmt .
 
 run:
-	cp -r testdata/dir-to-convert /tmp/ && go run . testdata/config.json
+	cp -r testdata/dir-to-convert /tmp/ && go run . /tmp/dir-to-convert
 
 test:
 	go test -v

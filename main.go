@@ -7,23 +7,22 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: md-to-html-go <config-path>")
+		fmt.Fprintln(os.Stderr, "usage: md-to-html-go <directory>")
 		os.Exit(1)
 	}
-	configPath := os.Args[1]
-	conf := newConfig(configPath)
+	directory := os.Args[1]
 	htmlTemplate, err := readContent("template.html")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error reading template.html: %v\n", err)
 		os.Exit(1)
 	}
-	files, err := collectFiles(conf.Directory)
+	files, err := collectFiles(directory)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error walking directory: %v\n", err)
 		os.Exit(1)
 	}
 	for _, f := range files {
-		html, err := convertFileAsHtml(f.input, htmlTemplate, conf.Directory)
+		html, err := convertFileAsHtml(f.input, htmlTemplate, directory)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "error converting %s: %v\n", f.input, err)
 			os.Exit(1)
