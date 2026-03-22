@@ -228,9 +228,6 @@ func (r *regex) convert(line string) string {
 	if r.linkOnly.MatchString(line) {
 		return "<p>" + r.linkOnly.ReplaceAllString(line, linkTemplate) + "</p>"
 	}
-	if r.linkShort.MatchString(line) {
-		return "<p>" + r.linkShort.ReplaceAllString(line, linkShortTemplate) + "</p>"
-	}
 	return "<p>" + r.convertInline(line) + "</p>"
 }
 
