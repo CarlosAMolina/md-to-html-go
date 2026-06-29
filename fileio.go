@@ -14,6 +14,8 @@ func readLines(path string) ([]string, error) {
 	defer file.Close()
 	var lines []string
 	scanner := bufio.NewScanner(file)
+	// Capacity per line: min=64KB (same as default), max=10MB (allows up to this if needed).
+	scanner.Buffer(make([]byte, 0, 64*1024), 10*1024*1024)
 	for scanner.Scan() {
 		lines = append(lines, scanner.Text())
 	}
