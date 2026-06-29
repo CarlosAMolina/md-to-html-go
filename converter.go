@@ -33,11 +33,15 @@ func convertFileAsHtml(file string, htmlTemplate string, root string) (string, e
 	if err != nil {
 		return "", err
 	}
-	result := convertLines(lines)
-	result = strings.Replace(htmlTemplate, "$body$", result, 1)
+	body := convertLines(lines)
+	return applyTemplate(htmlTemplate, body, file, root), nil
+}
+
+func applyTemplate(htmlTemplate, body, file, root string) string {
+	result := strings.Replace(htmlTemplate, "$body$", body, 1)
 	relativePath := calculateRootRelativePath(file, root)
 	result = strings.ReplaceAll(result, "$rootDirectoryRelativePathName$", relativePath)
-	return strings.TrimSpace(result), nil
+	return strings.TrimSpace(result)
 }
 
 func convertLines(lines []string) string {
