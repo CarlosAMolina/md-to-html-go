@@ -2,39 +2,42 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"os"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Fprintln(os.Stderr, "usage: md-to-html-go <directory>")
+	if err := run(os.Args[1:], os.Stdout, os.Stderr); err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	directory := os.Args[1]
+}
+
+func run(args []string, stdout, stderr io.Writer) error {
+	if len(args) < 1 {
+		return fmt.Errorf("usage: md-to-html-go <directory>")
+	}
+	directory := args[0]
 	htmlTemplate, err := readContent("template.html")
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error reading template.html: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("reading template: %w", err)
 	}
 	files, err := collectFiles(directory)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "error walking directory: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("walking directory %s: %w", directory, err)
 	}
 	for _, f := range files {
 		html, err := convertFileAsHtml(f.input, htmlTemplate, directory)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "error converting %s: %v\n", f.input, err)
-			os.Exit(1)
+			return fmt.Errorf("converting %s: %w", f.input, err)
 		}
 		if err := writeFile(f.output, html); err != nil {
-			fmt.Fprintf(os.Stderr, "error writing %s: %v\n", f.output, err)
-			os.Exit(1)
+			return fmt.Errorf("writing %s: %w", f.output, err)
 		}
 		if err := removeFile(f.input); err != nil {
-			fmt.Fprintf(os.Stderr, "error removing %s: %v\n", f.input, err)
-			os.Exit(1)
+			return fmt.Errorf("removing %s: %w", f.input, err)
 		}
-		fmt.Printf("%s -> %s\n", f.input, f.output)
+		fmt.Fprintf(stdout, "%s -> %s\n", f.input, f.output)
 	}
+	return nil
 }

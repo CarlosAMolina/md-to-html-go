@@ -177,8 +177,6 @@ func splitTableRow(line string) []string {
 	return result
 }
 
-// Converter holds pre-compiled regex patterns and provides methods
-// for converting Markdown text to HTML.
 type Converter struct {
 	blockquote *regexp.Regexp
 	bold       *regexp.Regexp
@@ -196,7 +194,6 @@ type Converter struct {
 	tableSep   *regexp.Regexp
 }
 
-// NewConverter creates a Converter with all regex patterns pre-compiled.
 func NewConverter() *Converter {
 	return &Converter{
 		blockquote: regexp.MustCompile(`^\s*>\s+(.*)`),
