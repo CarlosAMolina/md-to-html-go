@@ -5,7 +5,7 @@ import (
 )
 
 func TestIsHeader(t *testing.T) {
-	r := newRegex()
+	r := NewConverter()
 	var tests = []struct {
 		str      string
 		expected bool

@@ -26,7 +26,7 @@ type block struct {
 	lines []string
 }
 
-var r = newRegex()
+var r = NewConverter()
 
 func convertFileAsHtml(file string, htmlTemplate string, root string) (string, error) {
 	lines, err := readLines(file)
@@ -177,7 +177,9 @@ func splitTableRow(line string) []string {
 	return result
 }
 
-type regex struct {
+// Converter holds pre-compiled regex patterns and provides methods
+// for converting Markdown text to HTML.
+type Converter struct {
 	blockquote *regexp.Regexp
 	bold       *regexp.Regexp
 	codeBlock  *regexp.Regexp
@@ -194,8 +196,9 @@ type regex struct {
 	tableSep   *regexp.Regexp
 }
 
-func newRegex() *regex {
-	return &regex{
+// NewConverter creates a Converter with all regex patterns pre-compiled.
+func NewConverter() *Converter {
+	return &Converter{
 		blockquote: regexp.MustCompile(`^\s*>\s+(.*)`),
 		bold:       regexp.MustCompile(`__([^_]+)__`),
 		codeBlock:  regexp.MustCompile("```.*"),
@@ -213,7 +216,7 @@ func newRegex() *regex {
 	}
 }
 
-func (r *regex) convert(line string) string {
+func (r *Converter) convert(line string) string {
 	if strings.TrimSpace(line) == "" {
 		return ""
 	}
@@ -231,7 +234,7 @@ func (r *regex) convert(line string) string {
 	return "<p>" + r.convertInline(line) + "</p>"
 }
 
-func heading(r *regex, hashes string, text string) string {
+func heading(r *Converter, hashes string, text string) string {
 	count := len(hashes)
 	level := strconv.Itoa(count)
 	convertedText := r.convertInline(text)
@@ -254,7 +257,7 @@ func heading(r *regex, hashes string, text string) string {
 	return "<h" + level + ` id="` + id + `">` + convertedText + "</h" + level + ">"
 }
 
-func (r *regex) convertInline(text string) string {
+func (r *Converter) convertInline(text string) string {
 	// Protect ALL OTHER escaped underscores (these will KEEP backslashes)
 	text = strings.ReplaceAll(text, `\_`, "\x01")
 
