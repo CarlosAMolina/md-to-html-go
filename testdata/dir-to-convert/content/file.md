@@ -101,11 +101,11 @@ Inline code with blockquote character: `foo <bar`.
 
 Image:
 
-![](favicon.ico)
+![](../favicon.ico)
 
 Image with alt:
 
-![with alt](favicon.ico)
+![with alt](../favicon.ico)
 
 ## Underscore: \_\_init\_\_
 
