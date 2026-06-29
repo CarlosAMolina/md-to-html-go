@@ -17,22 +17,19 @@ func TestMainGo(t *testing.T) {
 	if err := os.RemoveAll(tmpDir); err != nil {
 		t.Fatalf("failed to delete %s: %v", tmpDir, err)
 	}
-	if err := copyDir(testdataSrc, tmpDir); err != nil {
-		t.Fatalf("failed to copy %s to %s: %v", testdataSrc, tmpDir, err)
-	}
+	copyDir(t, testdataSrc, tmpDir)
 	cmd := exec.Command("go", "run", ".", tmpDir)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		t.Fatalf("failed to execute main.go: %v\nStderr: %s", err, stderr.String())
 	}
-	if err := compareDirs(testdataExpected, tmpDir); err != nil {
-		t.Fatalf("directories do not match: %v", err)
-	}
+	compareDirs(t, testdataExpected, tmpDir)
 }
 
-func copyDir(src, dst string) error {
-	return filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
+func copyDir(t *testing.T, src, dst string) {
+	t.Helper()
+	err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -46,6 +43,9 @@ func copyDir(src, dst string) error {
 		}
 		return copyFile(path, target)
 	})
+	if err != nil {
+		t.Fatalf("failed to copy %s to %s: %v", src, dst, err)
+	}
 }
 
 func copyFile(src, dst string) error {
@@ -69,7 +69,8 @@ func copyFile(src, dst string) error {
 	return os.Chmod(dst, info.Mode())
 }
 
-func compareDirs(expected, actual string) error {
+func compareDirs(t *testing.T, expected, actual string) {
+	t.Helper()
 	err := filepath.Walk(expected, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -106,10 +107,10 @@ func compareDirs(expected, actual string) error {
 		return nil
 	})
 	if err != nil {
-		return err
+		t.Fatalf("directories do not match: %v", err)
 	}
 	// Check for extra generated files
-	return filepath.Walk(actual, func(path string, info os.FileInfo, err error) error {
+	err = filepath.Walk(actual, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -123,4 +124,7 @@ func compareDirs(expected, actual string) error {
 		}
 		return nil
 	})
+	if err != nil {
+		t.Fatalf("directories do not match: %v", err)
+	}
 }
