@@ -15,7 +15,7 @@ func main() {
 
 func run(args []string, stdout, stderr io.Writer) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: md-to-html-go <directory>")
+		return fmt.Errorf("usage: md-to-html <directory>")
 	}
 	directory := args[0]
 	cfg, err := loadConfig(directory)
