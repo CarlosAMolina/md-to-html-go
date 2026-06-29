@@ -28,12 +28,24 @@ type block struct {
 
 var conv = NewConverter()
 
-func convertFileAsHtml(file string, htmlTemplate string, root string) (string, error) {
+type conversionOptions struct {
+	embedImages bool
+	mdFilePath  string
+}
+
+func convertFileAsHtml(file string, htmlTemplate string, root string, cfg *config) (string, error) {
 	lines, err := readLines(file)
 	if err != nil {
 		return "", err
 	}
-	body := convertLines(lines)
+	opts := &conversionOptions{
+		embedImages: cfg.EmbedImages,
+		mdFilePath:  file,
+	}
+	body, err := convertLines(lines, opts)
+	if err != nil {
+		return "", err
+	}
 	return applyTemplate(htmlTemplate, body, file, root), nil
 }
 
@@ -44,7 +56,7 @@ func applyTemplate(htmlTemplate, body, file, root string) string {
 	return strings.TrimSpace(result)
 }
 
-func convertLines(lines []string) string {
+func convertLines(lines []string, opts *conversionOptions) (string, error) {
 	blocks := groupBlocks(lines)
 	parts := make([]string, 0, len(blocks))
 	for _, b := range blocks {
@@ -54,14 +66,22 @@ func convertLines(lines []string) string {
 		case codeBlock:
 			parts = append(parts, convertCodeBlock(b.lines))
 		case listBlock:
-			parts = append(parts, convertListBlock(b.lines))
+			result, err := convertListBlock(b.lines, opts)
+			if err != nil {
+				return "", err
+			}
+			parts = append(parts, result)
 		case tableBlock:
 			parts = append(parts, convertTableBlock(b.lines))
 		case textBlock:
-			parts = append(parts, conv.convert(b.lines[0]))
+			result, err := conv.convert(b.lines[0], opts)
+			if err != nil {
+				return "", err
+			}
+			parts = append(parts, result)
 		}
 	}
-	return strings.TrimSpace(strings.Join(parts, "\n"))
+	return strings.TrimSpace(strings.Join(parts, "\n")), nil
 }
 
 func groupBlocks(lines []string) []block {
@@ -217,28 +237,39 @@ func NewConverter() *Converter {
 	}
 }
 
-func (r *Converter) convert(line string) string {
+func (r *Converter) convert(line string, opts *conversionOptions) (string, error) {
 	if strings.TrimSpace(line) == "" {
-		return ""
+		return "", nil
 	}
 	if r.blockquote.MatchString(line) {
-		line = r.convertInline(line)
-		return r.blockquote.ReplaceAllString(line, "<blockquote>\n<p>$1</p>\n</blockquote>")
+		converted, err := r.convertInline(line, opts)
+		if err != nil {
+			return "", err
+		}
+		return r.blockquote.ReplaceAllString(converted, "<blockquote>\n<p>$1</p>\n</blockquote>"), nil
 	}
 	if r.h.MatchString(line) {
 		matches := r.h.FindStringSubmatch(line)
-		return heading(r, matches[1], matches[2])
+		result, err := heading(r, matches[1], matches[2], opts)
+		return result, err
 	}
 	if r.linkOnly.MatchString(line) {
-		return "<p>" + r.linkOnly.ReplaceAllString(line, linkTemplate) + "</p>"
+		return "<p>" + r.linkOnly.ReplaceAllString(line, linkTemplate) + "</p>", nil
 	}
-	return "<p>" + r.convertInline(line) + "</p>"
+	inline, err := r.convertInline(line, opts)
+	if err != nil {
+		return "", err
+	}
+	return "<p>" + inline + "</p>", nil
 }
 
-func heading(r *Converter, hashes string, text string) string {
+func heading(r *Converter, hashes string, text string, opts *conversionOptions) (string, error) {
 	count := len(hashes)
 	level := strconv.Itoa(count)
-	convertedText := r.convertInline(text)
+	convertedText, err := r.convertInline(text, opts)
+	if err != nil {
+		return "", err
+	}
 	convertedText = strings.ReplaceAll(convertedText, `\_`, "_")
 	convertedText = strings.TrimSpace(convertedText)
 
@@ -255,10 +286,10 @@ func heading(r *Converter, hashes string, text string) string {
 	}
 	id = sb.String()
 
-	return "<h" + level + ` id="` + id + `">` + convertedText + "</h" + level + ">"
+	return "<h" + level + ` id="` + id + `">` + convertedText + "</h" + level + ">", nil
 }
 
-func (r *Converter) convertInline(text string) string {
+func (r *Converter) convertInline(text string, opts *conversionOptions) (string, error) {
 	// Protect ALL OTHER escaped underscores (these will KEEP backslashes)
 	text = strings.ReplaceAll(text, `\_`, "\x01")
 
@@ -290,7 +321,10 @@ func (r *Converter) convertInline(text string) string {
 
 	// Restore images and links and handle their conversion
 	for _, part := range linkParts {
-		processed := convertImage(part)
+		processed, err := convertImage(part, opts)
+		if err != nil {
+			return "", err
+		}
 		processed = r.linkInline.ReplaceAllString(processed, linkTemplate)
 		processed = r.linkShort.ReplaceAllString(processed, linkShortTemplate)
 		text = strings.Replace(text, "\x03", processed, 1)
@@ -308,22 +342,21 @@ func (r *Converter) convertInline(text string) string {
 
 	text = strings.ReplaceAll(text, "\x01", "_")
 
-	return text
+	return text, nil
 }
 
-func convertImage(text string) string {
-	return conv.image.ReplaceAllStringFunc(text, func(match string) string {
-		m := conv.image.FindStringSubmatch(match)
-		if len(m) < 3 {
-			return match
-		}
-		alt := m[1]
-		src := m[2]
-		if alt == "" {
-			return `<img src="` + src + `" />`
-		}
-		return `<img src="` + src + `" alt="` + alt + `"/>`
-	})
+func convertImage(text string, opts *conversionOptions) (string, error) {
+	m := conv.image.FindStringSubmatch(text)
+	if m == nil || len(m) < 3 {
+		return text, nil
+	}
+	alt := m[1]
+	src := m[2]
+	result, err := convertImageTag(src, alt, opts.mdFilePath, opts.embedImages)
+	if err != nil {
+		return "", err
+	}
+	return result, nil
 }
 
 func calculateRootRelativePath(file string, root string) string {

@@ -27,6 +27,23 @@ func TestMainGo(t *testing.T) {
 	compareDirs(t, testdataExpected, tmpDir)
 }
 
+func TestMainGoEmbeddedImages(t *testing.T) {
+	tmpDir := "/tmp/dir-to-convert-embedded"
+	testdataSrc := "testdata/dir-to-convert-embedded"
+	testdataExpected := "testdata/dir-converted-embedded"
+	if err := os.RemoveAll(tmpDir); err != nil {
+		t.Fatalf("failed to delete %s: %v", tmpDir, err)
+	}
+	copyDir(t, testdataSrc, tmpDir)
+	cmd := exec.Command("go", "run", ".", tmpDir)
+	var stderr bytes.Buffer
+	cmd.Stderr = &stderr
+	if err := cmd.Run(); err != nil {
+		t.Fatalf("failed to execute main.go: %v\nStderr: %s", err, stderr.String())
+	}
+	compareDirs(t, testdataExpected, tmpDir)
+}
+
 func copyDir(t *testing.T, src, dst string) {
 	t.Helper()
 	err := filepath.Walk(src, func(path string, info os.FileInfo, err error) error {

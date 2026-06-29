@@ -143,7 +143,11 @@ func TestConvertListBlock(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			result := convertListBlock(tt.lines)
+			opts := &conversionOptions{}
+			result, err := convertListBlock(tt.lines, opts)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
 			if result != tt.expected {
 				t.Errorf("convertListBlock(%v)\nwant:\n%s\n\ngot:\n%s", tt.lines, tt.expected, result)
 			}

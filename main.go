@@ -18,6 +18,10 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return fmt.Errorf("usage: md-to-html-go <directory>")
 	}
 	directory := args[0]
+	cfg, err := loadConfig(directory)
+	if err != nil {
+		return fmt.Errorf("loading config: %w", err)
+	}
 	htmlTemplate, err := readContent("template.html")
 	if err != nil {
 		return fmt.Errorf("reading template: %w", err)
@@ -27,7 +31,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return fmt.Errorf("walking directory %s: %w", directory, err)
 	}
 	for _, f := range files {
-		html, err := convertFileAsHtml(f.input, htmlTemplate, directory)
+		html, err := convertFileAsHtml(f.input, htmlTemplate, directory, cfg)
 		if err != nil {
 			return fmt.Errorf("converting %s: %w", f.input, err)
 		}
