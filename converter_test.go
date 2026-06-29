@@ -5,7 +5,7 @@ import (
 )
 
 func TestIsHeader(t *testing.T) {
-	r := NewConverter()
+	c := NewConverter()
 	var tests = []struct {
 		str      string
 		expected bool
@@ -16,7 +16,7 @@ func TestIsHeader(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.str, func(t *testing.T) {
-			result := r.h.MatchString(tt.str)
+			result := c.h.MatchString(tt.str)
 			if tt.expected != result {
 				t.Errorf("want %t, got %t", tt.expected, result)
 			}

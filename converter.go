@@ -26,7 +26,7 @@ type block struct {
 	lines []string
 }
 
-var r = NewConverter()
+var conv = NewConverter()
 
 func convertFileAsHtml(file string, htmlTemplate string, root string) (string, error) {
 	lines, err := readLines(file)
@@ -58,7 +58,7 @@ func convertLines(lines []string) string {
 		case tableBlock:
 			parts = append(parts, convertTableBlock(b.lines))
 		case textBlock:
-			parts = append(parts, r.convert(b.lines[0]))
+			parts = append(parts, conv.convert(b.lines[0]))
 		}
 	}
 	return strings.TrimSpace(strings.Join(parts, "\n"))
@@ -72,11 +72,11 @@ func groupBlocks(lines []string) []block {
 		case strings.TrimSpace(lines[i]) == "":
 			blocks = append(blocks, block{kind: blankBlock})
 			i++
-		case r.codeBlock.MatchString(lines[i]):
+		case conv.codeBlock.MatchString(lines[i]):
 			var codeLines []string
 			codeLines = append(codeLines, lines[i]) // opening ```
 			i++
-			for i < len(lines) && !r.codeBlock.MatchString(lines[i]) {
+			for i < len(lines) && !conv.codeBlock.MatchString(lines[i]) {
 				codeLines = append(codeLines, lines[i])
 				i++
 			}
@@ -85,10 +85,10 @@ func groupBlocks(lines []string) []block {
 				i++
 			}
 			blocks = append(blocks, block{kind: codeBlock, lines: codeLines})
-		case r.listItem.MatchString(lines[i]):
+		case conv.listItem.MatchString(lines[i]):
 			var listLines []string
 			for i < len(lines) {
-				if r.listItem.MatchString(lines[i]) {
+				if conv.listItem.MatchString(lines[i]) {
 					listLines = append(listLines, lines[i])
 					i++
 				} else if strings.TrimSpace(lines[i]) == "" {
@@ -97,7 +97,7 @@ func groupBlocks(lines []string) []block {
 					for j < len(lines) && strings.TrimSpace(lines[j]) == "" {
 						j++
 					}
-					if j < len(lines) && (r.listItem.MatchString(lines[j]) || isIndentedBlockquote(lines[j]) || (len(lines[j]) > 0 && lines[j][0] == ' ')) {
+					if j < len(lines) && (conv.listItem.MatchString(lines[j]) || isIndentedBlockquote(lines[j]) || (len(lines[j]) > 0 && lines[j][0] == ' ')) {
 						listLines = append(listLines, lines[i])
 						i++
 					} else {
@@ -115,9 +115,9 @@ func groupBlocks(lines []string) []block {
 				}
 			}
 			blocks = append(blocks, block{kind: listBlock, lines: listLines})
-		case r.tableRow.MatchString(lines[i]) && i+1 < len(lines) && r.tableSep.MatchString(lines[i+1]):
+		case conv.tableRow.MatchString(lines[i]) && i+1 < len(lines) && conv.tableSep.MatchString(lines[i+1]):
 			var tableLines []string
-			for i < len(lines) && r.tableRow.MatchString(lines[i]) {
+			for i < len(lines) && conv.tableRow.MatchString(lines[i]) {
 				tableLines = append(tableLines, lines[i])
 				i++
 			}
@@ -131,7 +131,7 @@ func groupBlocks(lines []string) []block {
 }
 
 func isIndentedBlockquote(line string) bool {
-	return len(line) > 0 && line[0] == ' ' && r.blockquote.MatchString(strings.TrimSpace(line))
+	return len(line) > 0 && line[0] == ' ' && conv.blockquote.MatchString(strings.TrimSpace(line))
 }
 
 var htmlEscaper = strings.NewReplacer("<", "&lt;", ">", "&gt;")
@@ -312,8 +312,8 @@ func (r *Converter) convertInline(text string) string {
 }
 
 func convertImage(text string) string {
-	return r.image.ReplaceAllStringFunc(text, func(match string) string {
-		m := r.image.FindStringSubmatch(match)
+	return conv.image.ReplaceAllStringFunc(text, func(match string) string {
+		m := conv.image.FindStringSubmatch(match)
 		if len(m) < 3 {
 			return match
 		}

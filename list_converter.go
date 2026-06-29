@@ -34,7 +34,7 @@ func convertListBlock(lines []string) string {
 			// non-blockquote content (either a list item or indented text)
 			if j < len(lines) {
 				nextLine := lines[j]
-				if !isIndentedBlockquote(nextLine) && r.listItem.MatchString(nextLine) {
+				if !isIndentedBlockquote(nextLine) && conv.listItem.MatchString(nextLine) {
 					hasBlankLines = true
 					break
 				}
@@ -58,16 +58,16 @@ func convertListBlock(lines []string) string {
 
 		if isIndentedBlockquote(line) {
 			trimmed := strings.TrimSpace(line)
-			m := r.blockquote.FindStringSubmatch(trimmed)
+			m := conv.blockquote.FindStringSubmatch(trimmed)
 			if m != nil {
-				content := r.convertInline(m[1])
+				content := conv.convertInline(m[1])
 				writeListTag(&sb, "<blockquote>\n<p>"+content+"</p>\n</blockquote>")
 			}
 			i++
 			continue
 		}
 
-		m := r.listItem.FindStringSubmatch(line)
+		m := conv.listItem.FindStringSubmatch(line)
 		if m == nil {
 			// Non-list-item line
 			if len(stack) > 0 {
@@ -86,7 +86,7 @@ func convertListBlock(lines []string) string {
 
 					// Now process as continuation of parent if there is one
 					if len(stack) > 0 {
-						content := r.convertInline(strings.TrimSpace(line))
+						content := conv.convertInline(strings.TrimSpace(line))
 						if hasBlankLines {
 							writeListTag(&sb, "<p>"+content+"</p>")
 						}
@@ -94,7 +94,7 @@ func convertListBlock(lines []string) string {
 				} else if indentLevel > topIndent {
 					// Indented more than current list - continuation of current item
 					trimmedLine := strings.TrimSpace(line)
-					if r.codeBlock.MatchString(trimmedLine) {
+					if conv.codeBlock.MatchString(trimmedLine) {
 						var codeLines []string
 						codeLines = append(codeLines, trimmedLine)
 
@@ -114,7 +114,7 @@ func convertListBlock(lines []string) string {
 							}
 
 							codeLines = append(codeLines, content)
-							if r.codeBlock.MatchString(strings.TrimSpace(nextLine)) {
+							if conv.codeBlock.MatchString(strings.TrimSpace(nextLine)) {
 								i++
 								break
 							}
@@ -124,7 +124,7 @@ func convertListBlock(lines []string) string {
 						writeListTag(&sb, codeOutput)
 						continue
 					}
-					content := r.convertInline(strings.TrimSpace(line))
+					content := conv.convertInline(strings.TrimSpace(line))
 					if hasBlankLines {
 						writeListTag(&sb, "<p>"+content+"</p>")
 					}
@@ -136,7 +136,7 @@ func convertListBlock(lines []string) string {
 
 		indent := len(m[1])
 		marker := m[2]
-		text := r.convertInline(strings.TrimSpace(m[3]))
+		text := conv.convertInline(strings.TrimSpace(m[3]))
 
 		targetType := "ul"
 		if marker != "-" {
